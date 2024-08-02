@@ -4,6 +4,9 @@
   import menuSvg from "./assets/amburg.svg?raw"
   import ghLogoSvg from "./assets/gh-logo.svg?raw"
   import twtSvg from "./assets/twiddr.svg?raw"
+
+  import WorkflowSelector from "./components/WorkflowSelector.svelte"
+  import WorkflowUploadButton from "./components/WorkflowUploadButton.svelte"
 </script>
 
 {#snippet sidebar()}
@@ -176,11 +179,11 @@
     </div>
 
     <div class="navbar-center flex-grow">
-      <select class="select select-sm select-bordered w-full max-w-xs">
-        <option disabled selected>Select a workflow</option>
-        <option>sd15_inpainting</option>
-        <option>sd15_big_booty_latinas</option>
-      </select>
+      <WorkflowSelector />
+    </div>
+
+    <div class="navbar-end">
+      <WorkflowUploadButton />
     </div>
   </nav>
 {/snippet}
