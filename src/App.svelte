@@ -10,7 +10,7 @@
 </script>
 
 {#snippet sidebar()}
-  <header class="sticky top-0 items-center gap-2 px-4 py-2 flex gap-2">
+  <header class="sticky top-0 items-center px-4 py-2 flex gap-2">
     <h1 class="font-mono font-bold text-xl md:text-2xl">goodUI</h1>
     <a class="btn btn-ghost" href="https://github.com/chinsuko-chan/goodUI" target="_blank" rel="noopener">
       <span>{@html ghLogoSvg}</span>
