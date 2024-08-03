@@ -1,4 +1,6 @@
 <script>
+  const KEY = "goodUI.views.workflowContentsExpandedNodes"
+
   import { connectWorkflowManager } from "../stores/workflowManager.svelte"
 
   const manager = connectWorkflowManager()
@@ -10,16 +12,38 @@
     })
   }
 
-  let nodeEntries = $derived(Object.entries(manager.current))
+  let nodeEntries = $derived(Object.entries(manager.current || {}))
+  let allExpandedNodes = $state(JSON.parse(localStorage.getItem(KEY) || "{}"))
 
-  /** @todo persist this? */
-  let expandedNodes = $state({})
+  /** @todo move to stores? annoying af here */
+  let expandedState = {
+    get current() {
+      return allExpandedNodes[manager.workflowName] || {}
+    },
+    toggle(id) {
+      const currentState = allExpandedNodes[manager.workflowName]
 
-  function toggleNode(id) {
-    expandedNodes[id] ? delete expandedNodes[id] : expandedNodes[id] = true
+      if (!currentState) {
+        return allExpandedNodes[manager.workflowName] = {
+          [id]: 1
+        }
+      }
+
+      if (currentState && currentState[id]) {
+        delete allExpandedNodes[manager.workflowName][id]
+      } else {
+        allExpandedNodes[manager.workflowName][id] = 1
+      }
+    },
+    save() {
+      localStorage.setItem(KEY, JSON.stringify(allExpandedNodes))
+    }
   }
 
-  $inspect(manager.current)
+  function toggleNode(id) {
+    expandedState.toggle(id)
+    expandedState.save()
+  }
 </script>
 
 {#snippet inputsListItem(key, displayValue)}
@@ -58,7 +82,7 @@
             {id}
           </button>
         </div>
-        <div class="timeline-end" class:timeline-box={expandedNodes[id]}>
+        <div class="timeline-end" class:timeline-box={expandedState.current[id]}>
           <section>
             <h2 id={`node-${id}`}>
               <a aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
@@ -70,7 +94,7 @@
               {node._meta.title}
             </h2>
 
-            {#if expandedNodes[id]}
+            {#if expandedState.current[id]}
               <h3 class="font-bold">Inputs</h3>
               <ul>
                 {#each formatInputs(node.inputs) as [key, val]}

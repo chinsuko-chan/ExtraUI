@@ -38,7 +38,7 @@
         }
 
         newWorkflows[key] = JSON.parse(e.target.result)
-        manager.update(newWorkflows)
+        manager.workflows = newWorkflows
         manager.save()
       }
       reader.readAsText(file)
