@@ -12,6 +12,13 @@
 
   let nodeEntries = $derived(Object.entries(manager.current))
 
+  /** @todo persist this? */
+  let expandedNodes = $state({})
+
+  function toggleNode(id) {
+    expandedNodes[id] ? delete expandedNodes[id] : expandedNodes[id] = true
+  }
+
   $inspect(manager.current)
 </script>
 
@@ -47,11 +54,11 @@
       <li>
         {@render leadingHr(index)}
         <div class="timeline-middle">
-          <button class="btn btn-outline btn-xs btn-circle">
+          <button class="btn btn-outline btn-xs btn-circle" onclick={() => toggleNode(id)}>
             {id}
           </button>
         </div>
-        <div class="timeline-end timeline-box">
+        <div class="timeline-end" class:timeline-box={expandedNodes[id]}>
           <section>
             <h2 id={`node-${id}`}>
               <a aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
@@ -63,12 +70,14 @@
               {node._meta.title}
             </h2>
 
-            <h3 class="font-bold">Inputs</h3>
-            <ul>
-              {#each formatInputs(node.inputs) as [key, val]}
-                {@render inputsListItem(key, val)}
-              {/each}
-            </ul>
+            {#if expandedNodes[id]}
+              <h3 class="font-bold">Inputs</h3>
+              <ul>
+                {#each formatInputs(node.inputs) as [key, val]}
+                  {@render inputsListItem(key, val)}
+                {/each}
+              </ul>
+            {/if}
           </section>
         </div>
         {@render trailingHr(nodeEntries.length, index)}
