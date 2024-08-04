@@ -8,14 +8,22 @@
   import WorkflowSelector from "./components/WorkflowSelector.svelte"
   import WorkflowUploadButton from "./components/WorkflowUploadButton.svelte"
   import WorkflowContents from "./components/WorkflowContents.svelte"
+
+  /** mock until api integrations is rdy */
+  let connected
 </script>
 
 {#snippet sidebar()}
-  <header class="sticky top-0 items-center px-4 py-2 flex gap-2">
+  <header class="sticky top-0 items-center justify-between px-4 py-2 flex gap-2">
     <h1 class="font-mono font-bold text-xl md:text-2xl">goodUI</h1>
-    <a class="btn btn-ghost" href="https://github.com/chinsuko-chan/goodUI" target="_blank" rel="noopener">
-      <span>{@html ghLogoSvg}</span>
-    </a>
+    <button
+      class="btn btn-xs btn-outline"
+      class:btn-success={connected}
+      class:btn-error={!connected}
+      onclick={() => connected = !connected}
+    >
+      {connected ? "Connected" : "Not connected"}
+    </button>
   </header>
   <div class="flex-grow">
     <div>
@@ -160,14 +168,15 @@
       </menu>
     </div>
   </div>
-  <footer class="text-xs footer gap-2 p-4 px-8">
-    <div class="flex items-center gap-2">
+  <footer class="footer text-xs grid-rows-2 gap-2 p-4 px-8">
+    <a class="link btn btn-sm btn-ghost font-normal flex items-center gap-2" href="https://github.com/chinsuko-chan/goodUI" target="_blank" rel="noopener">
+      <span>{@html ghLogoSvg}</span>
+      goodUI
+    </a>
+    <a class="link btn btn-sm btn-ghost font-normal flex items-center gap-2" href="https://x.com/chinsuko_chan" target="_blank" rel="noopener">
       <span>{@html twtSvg}</span>
-      <a class="link" href="https://x.com/chinsuko_chan" target="_blank" rel="noopener">
-        @chinsuko_chan
-      </a>
-      <span>🧡</span>
-    </div>
+      @chinsuko_chan
+    </a>
   </footer>
 {/snippet}
 
