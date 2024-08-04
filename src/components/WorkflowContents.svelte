@@ -5,6 +5,10 @@
 
   const manager = connectWorkflowManager()
 
+  function formatTitle(nodeObject) {
+    return nodeObject._meta?.title || nodeObject.class_type
+  }
+
   /** @todo maybe something better than JSON.stringify */
   function formatInputs(inputsObject) {
     return Object.entries(inputsObject).map(([key, value]) => {
@@ -91,7 +95,7 @@
                   >#</span
                 >
               </a>
-              {node._meta.title}
+              {formatTitle(node)}
             </h2>
 
             {#if expandedState.current[id]}
