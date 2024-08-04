@@ -8,6 +8,7 @@
   import WorkflowSelector from "./components/WorkflowSelector.svelte"
   import WorkflowUploadButton from "./components/WorkflowUploadButton.svelte"
   import WorkflowContents from "./components/WorkflowContents.svelte"
+  import WorkflowRunButton from "./components/WorkflowRunButton.svelte"
   import ApiConfigModal from "./components/ApiConfigModal.svelte"
 
   import { api, STATUS } from "./stores/apiConnectionManager.svelte"
@@ -19,16 +20,21 @@
 </script>
 
 {#snippet sidebar()}
-  <header class="sticky top-0 items-center justify-between px-4 py-2 flex gap-2">
-    <h1 class="font-mono font-bold text-xl md:text-2xl">goodUI</h1>
-    <button
-      class="btn btn-xs btn-outline"
-      class:btn-error={!connected}
-      class:btn-success={connected}
-      onclick={() => apiConfigModal.showModal()}
-    >
-      {connected ? "Connected" : "Not connected"}
-    </button>
+  <header class="sticky top-0 px-4 py-2 grid grid-rows-2 gap-4">
+    <div class="flex justify-between items-center gap-2">
+      <h1 class="font-mono font-bold text-xl md:text-2xl">goodUI</h1>
+      <button
+        class="btn btn-xs btn-outline"
+        class:btn-error={!connected}
+        class:btn-success={connected}
+        onclick={() => apiConfigModal.showModal()}
+      >
+        {connected ? "Connected" : "Not connected"}
+      </button>
+    </div>
+    <div>
+      <WorkflowUploadButton />
+    </div>
   </header>
   <div class="flex-grow">
     <div>
@@ -198,7 +204,7 @@
     </div>
 
     <div class="navbar-end">
-      <WorkflowUploadButton />
+      <WorkflowRunButton />
     </div>
   </nav>
 {/snippet}

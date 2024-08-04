@@ -68,7 +68,8 @@
   tabindex="0"
   role="button"
   class:border-dashed={dropzoneFocused}
-  class="btn btn-primary btn-outline btn-sm focus:border-dashed"
+  class:btn-primary={dropzoneFocused}
+  class="btn btn-block btn-sm btn-outline"
   {ondrop}
   {ondragover}
   {ondragenter}
