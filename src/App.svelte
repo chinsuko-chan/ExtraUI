@@ -8,9 +8,14 @@
   import WorkflowSelector from "./components/WorkflowSelector.svelte"
   import WorkflowUploadButton from "./components/WorkflowUploadButton.svelte"
   import WorkflowContents from "./components/WorkflowContents.svelte"
+  import ApiConfigModal from "./components/ApiConfigModal.svelte"
 
-  /** mock until api integrations is rdy */
-  let connected
+  import { api, STATUS } from "./stores/apiConnectionManager.svelte"
+
+  let connected = $derived.by(() => {
+    return api.status === STATUS.IDLE || api.status === STATUS.RUNNING
+  })
+  let apiConfigModal = $state()
 </script>
 
 {#snippet sidebar()}
@@ -18,9 +23,9 @@
     <h1 class="font-mono font-bold text-xl md:text-2xl">goodUI</h1>
     <button
       class="btn btn-xs btn-outline"
-      class:btn-success={connected}
       class:btn-error={!connected}
-      onclick={() => connected = !connected}
+      class:btn-success={connected}
+      onclick={() => apiConfigModal.showModal()}
     >
       {connected ? "Connected" : "Not connected"}
     </button>
@@ -214,6 +219,7 @@
       <WorkflowContents />
     </div>
   </main>
+  <ApiConfigModal bind:apiConfigModal={apiConfigModal} />
 </div>
 
 <style>
