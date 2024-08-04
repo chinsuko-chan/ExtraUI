@@ -8,9 +8,6 @@ const CLIENT_ID = "goodUI"
  * /view?filename={filename}&type={type}(&subfolder=%{subfolder})
  */
 
-/** whitelist of messages we care about from server */
-const MESSAGES = ["status"]
-
 export const STATUS = {
   DISCONNECTED: "DISCONNECTED",
   CONNECTING: "CONNECTING",
@@ -20,11 +17,17 @@ export const STATUS = {
 }
 
 const SERVER_URI_KEY = "goodUI.stores.apiConnectionManager.serverUri"
+/** blacklist messages we log to console */
+const IGNORELIST_KEY = "goodUI.stores.apiConnectionManager.ignorelist"
 
 /** server without the protocol (no http:// or ws:// in front) */
 let serverUri = $state(
   JSON.parse(localStorage.getItem(SERVER_URI_KEY) || "null"),
 )
+let ignorelist = $state(
+  JSON.parse(localStorage.getItem(IGNORELIST_KEY) || "[]"),
+)
+
 let socket
 let status = $state(STATUS.DISCONNECTED)
 
@@ -35,9 +38,12 @@ let status = $state(STATUS.DISCONNECTED)
 const onOpen = (_event) => (status = STATUS.IDLE)
 const onMessage = (event) => {
   const data = JSON.parse(event.data)
-  if (MESSAGES.includes(data.type)) {
-    console.log("< ", data)
-  }
+  if (ignorelist.includes(data.type)) return
+
+  console.log("<", { type: data.type })
+  console.group("data")
+  console.log(data.data)
+  console.groupEnd()
 }
 
 export const api = {
@@ -53,6 +59,13 @@ export const api = {
   },
   get socket() {
     return socket
+  },
+  get ignorelist() {
+    return ignorelist
+  },
+  set ignorelist(newValues) {
+    ignorelist = newValues
+    localStorage.setItem(IGNORELIST_KEY, JSON.stringify(newValues))
   },
   connect() {
     socket?.close() // if doing reconnect

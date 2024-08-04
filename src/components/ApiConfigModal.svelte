@@ -3,6 +3,11 @@
 
   import { api, STATUS } from "../stores/apiConnectionManager.svelte"
 
+  function updateIgnorelist(e) {
+    const values = e.target.value.split(",").map((s) => s.trim())
+    api.ignorelist = values
+  }
+
   function tryConnect() {
     if (api.status === STATUS.DISCONNECTED) api.connect()
     if (api.status === STATUS.ERROR) api.connect()
@@ -45,6 +50,19 @@
           bind:value={api.uri}
         />
       </label>
+      <div class="form-control">
+        <div class="label">
+          <span class="label-text">Ignored message types</span>
+          <span class="label-text-alt">Separate by commas</span>
+        </div>
+        <input
+          type="text"
+          class="input input-sm input-ghost"
+          placeholder="Eg. crystools.monitor,other-noisy-plugin"
+          value={api.ignorelist.join(",")}
+          onchange={updateIgnorelist}
+        />
+      </div>
     </div>
     <hr class="my-4" />
     <div>
