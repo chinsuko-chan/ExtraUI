@@ -30,6 +30,7 @@ let ignorelist = $state(
 
 let socket
 let status = $state(STATUS.DISCONNECTED)
+let queueSize = $state(0)
 
 /**
  * FUNCTIONS
@@ -37,13 +38,22 @@ let status = $state(STATUS.DISCONNECTED)
 
 const onOpen = (_event) => (status = STATUS.IDLE)
 const onMessage = (event) => {
-  const data = JSON.parse(event.data)
-  if (ignorelist.includes(data.type)) return
+  const payload = JSON.parse(event.data)
+  if (ignorelist.includes(payload.type)) return
 
-  console.log("<", { type: data.type })
+  console.log("<", { type: payload.type })
   console.group("data")
-  console.log(data.data)
+  console.log(payload.data)
   console.groupEnd()
+
+  // check if queue updated
+  if (payload.type === "status" && payload?.data?.status?.exec_info) {
+    const execInfo = payload.data.status.exec_info
+    if (typeof execInfo.queue_remaining === "number") {
+      if (execInfo.queue_remaining === 0) status = STATUS.IDLE
+      queueSize = execInfo.queue_remaining
+    }
+  }
 }
 
 export const api = {
@@ -67,6 +77,9 @@ export const api = {
     ignorelist = newValues
     localStorage.setItem(IGNORELIST_KEY, JSON.stringify(newValues))
   },
+  get isIdle() {
+    return status === STATUS.IDLE
+  },
   connect() {
     socket?.close() // if doing reconnect
     status = STATUS.CONNECTING
@@ -86,5 +99,27 @@ export const api = {
       socket?.close()
     } catch {}
     status = STATUS.DISCONNECTED
+  },
+  /** POST payload to /prompt */
+  async prompt(workflowObject) {
+    const request = new Request(`http://${serverUri}/prompt`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_id: CLIENT_ID,
+        prompt: workflowObject,
+      }),
+    })
+
+    status = STATUS.RUNNING
+    try {
+      const resp = await fetch(request)
+      return await resp.json()
+    } catch (e) {
+      console.error(e)
+      return {}
+    }
   },
 }
