@@ -1,4 +1,6 @@
 <script>
+  import { onMount } from "svelte"
+
   /** sidebar is visible at all times >lg */
   const DRAWER_ID = "drawer"
   import menuSvg from "./assets/amburg.svg?raw"
@@ -12,11 +14,18 @@
   import ApiConfigModal from "./components/ApiConfigModal.svelte"
 
   import { api, STATUS } from "./stores/apiConnectionManager.svelte"
+  let apiStatus = $derived.by(() => {
+    if (api.status === STATUS.CONNECTING) return "Connecting"
+    if (api.status === STATUS.IDLE) return "Connected"
+    if (api.status === STATUS.RUNNING) return "Connected"
 
-  let connected = $derived.by(() => {
-    return api.status === STATUS.IDLE || api.status === STATUS.RUNNING
+    return "Not connected"
   })
   let apiConfigModal = $state()
+
+  onMount(() => {
+    if (api.autoconnect) api.connect()
+  })
 </script>
 
 {#snippet sidebar()}
@@ -25,11 +34,12 @@
       <h1 class="font-mono font-bold text-xl md:text-2xl">goodUI</h1>
       <button
         class="btn btn-xs btn-outline"
-        class:btn-error={!connected}
-        class:btn-success={connected}
+        class:btn-error={apiStatus === "Not connected"}
+        class:btn-warning={apiStatus === "Connecting"}
+        class:btn-success={apiStatus === "Connected"}
         onclick={() => apiConfigModal.showModal()}
       >
-        {connected ? "Connected" : "Not connected"}
+        {apiStatus}
       </button>
     </div>
     <div>
@@ -213,7 +223,7 @@
   <main class="bg-base-100 drawer lg:drawer-open">
     <input id={DRAWER_ID} type="checkbox" class="drawer-toggle" />
 
-    <div class="drawer-side border-r-2 z-10">
+    <div class="drawer-side border-x border-l-0 z-10">
       <label for={DRAWER_ID} class="drawer-overlay"></label>
       <aside class="flex flex-col bg-base-100 min-h-screen w-80">
         {@render sidebar()}

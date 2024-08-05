@@ -51,18 +51,30 @@
         />
       </label>
       <div class="form-control">
+        <label class="label cursor-pointer">
+          <span class="label-text">Autoconnect?</span>
+          <input
+            type="checkbox"
+            class="toggle toggle-sm"
+            class:toggle-success={api.autoconnect}
+            bind:checked={api.autoconnect}
+          />
+        </label>
+      </div>
+      <label class="form-control">
         <div class="label">
           <span class="label-text">Ignored message types</span>
-          <span class="label-text-alt">Separate by commas</span>
         </div>
-        <input
-          type="text"
-          class="input input-sm input-ghost"
+        <textarea
+          class="textarea textarea-bordered resize-none"
           placeholder="Eg. crystools.monitor,other-noisy-plugin"
           value={api.ignorelist.join(",")}
           onchange={updateIgnorelist}
-        />
-      </div>
+        ></textarea>
+        <div class="label">
+          <span class="label-text-alt">Separate by commas</span>
+        </div>
+      </label>
     </div>
     <hr class="my-4" />
     <div>

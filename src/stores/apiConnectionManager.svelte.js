@@ -19,6 +19,7 @@ export const STATUS = {
 const SERVER_URI_KEY = "goodUI.stores.apiConnectionManager.serverUri"
 /** blacklist messages we log to console */
 const IGNORELIST_KEY = "goodUI.stores.apiConnectionManager.ignorelist"
+const AUTOCONNECT_KEY = "goodUI.stores.apiConnectionManager.autoconnect"
 
 /** server without the protocol (no http:// or ws:// in front) */
 let serverUri = $state(
@@ -26,6 +27,9 @@ let serverUri = $state(
 )
 let ignorelist = $state(
   JSON.parse(localStorage.getItem(IGNORELIST_KEY) || "[]"),
+)
+let autoconnect = $state(
+  JSON.parse(localStorage.getItem(AUTOCONNECT_KEY) || "false"),
 )
 
 let socket
@@ -76,6 +80,13 @@ export const api = {
   set ignorelist(newValues) {
     ignorelist = newValues
     localStorage.setItem(IGNORELIST_KEY, JSON.stringify(newValues))
+  },
+  get autoconnect() {
+    return autoconnect
+  },
+  set autoconnect(val) {
+    autoconnect = Boolean(val)
+    localStorage.setItem(AUTOCONNECT_KEY, JSON.stringify(autoconnect))
   },
   get isIdle() {
     return status === STATUS.IDLE
