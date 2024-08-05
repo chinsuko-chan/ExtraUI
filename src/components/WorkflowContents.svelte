@@ -2,6 +2,8 @@
   const KEY = "goodUI.views.workflowContentsExpandedNodes"
 
   import { connectWorkflowManager } from "../stores/workflowManager.svelte"
+  import { api, STATUS } from "../stores/apiConnectionManager.svelte"
+  import { runner } from "../stores/workflowRunnerManager.svelte"
 
   const manager = connectWorkflowManager()
 
@@ -48,6 +50,33 @@
     expandedState.toggle(id)
     expandedState.save()
   }
+
+  let polling = -1
+  let pollingDelay = 150
+  let currentOutputs = $state({})
+
+  /** @todo cache with indexedDB */
+  function pollOutputs(lastRun) {
+    polling = setInterval(async () => {
+      const info = await api.history(lastRun.prompt_id)
+      if (!Object.keys(info).length) {
+        pollingDelay *= 2 // simple backoff 4 now
+        return // no result yet
+      }
+
+      currentOutputs = info[lastRun.prompt_id].outputs
+
+      pollingDelay = 150 // reset
+      clearInterval(polling)
+    }, pollingDelay)
+  }
+
+  /** poll when most recent run changes and idle */
+  $effect(() => {
+    if (api.status === STATUS.IDLE) return pollOutputs(runner.lastRun)
+  })
+
+  $inspect(currentOutputs)
 </script>
 
 {#snippet inputsListItem(key, displayValue)}
@@ -60,6 +89,15 @@
         <span>{displayValue}</span>
       </div>
     </details>
+  </li>
+{/snippet}
+
+{#snippet outputsListItem(key, displayValue)}
+  <li>
+    <div class="flex flex-col gap-2 p-2">
+      <code class="badge badge-outline badge-primary">{key}</code>
+      <span>{displayValue}</span>
+    </div>
   </li>
 {/snippet}
 
@@ -86,7 +124,12 @@
             {id}
           </button>
         </div>
-        <div class="timeline-end" class:timeline-box={expandedState.current[id]}>
+        <div
+          class="timeline-end"
+          class:ml-4={!expandedState.current[id]}
+          class:timeline-box={expandedState.current[id]}
+          class:border-primary={currentOutputs[id]}
+        >
           <section>
             <h2 id={`node-${id}`}>
               <a aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
@@ -105,6 +148,14 @@
                   {@render inputsListItem(key, val)}
                 {/each}
               </ul>
+              {#if currentOutputs[id]}
+                <h3 class="font-bold">Outputs</h3>
+                <ul>
+                  {#each formatInputs(currentOutputs[id]) as [key, val]}
+                    {@render outputsListItem(key, val)}
+                  {/each}
+                </ul>
+              {/if}
             {/if}
           </section>
         </div>

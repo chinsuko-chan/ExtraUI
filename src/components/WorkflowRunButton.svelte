@@ -12,8 +12,11 @@
   async function tryQueue() {
     try {
       const resp = await runner.run()
-      console.log(resp)
-      console.log(runner.lastRun)
+      if (runner.lastRun?.prompt_id === resp.prompt_id)
+        return console.warn("Workflow didn't run.")
+
+      runner.push(resp)
+      runner.save()
     } catch (e) {
       console.error(e)
     }

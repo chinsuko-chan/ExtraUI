@@ -18,10 +18,8 @@ export const runner = {
     if (!api.isIdle) return console.warn("Skipping execution, not idle.")
     /** @note not compatible with i2i workflows yet */
     const queueResult = await api.prompt(workflow.current)
-    if (!queueResult.prompt_id) return
+    if (!queueResult.prompt_id) return {}
 
-    history[workflow.workflowName] ||= []
-    history[workflow.workflowName].push(queueResult)
     return queueResult
   },
   get history() {
@@ -29,6 +27,10 @@ export const runner = {
   },
   get lastRun() {
     return lastRun
+  },
+  push(result) {
+    history[workflow.workflowName] ||= []
+    history[workflow.workflowName].push(result)
   },
   save() {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history))

@@ -122,4 +122,15 @@ export const api = {
       return {}
     }
   },
+  /** GET /history */
+  async history(promptId) {
+    const request = new Request(`http://${serverUri}/history/${promptId}`)
+    try {
+      const resp = await fetch(request)
+      return await resp.json()
+    } catch (e) {
+      console.error(e)
+      return {}
+    }
+  },
 }
