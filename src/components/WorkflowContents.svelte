@@ -58,7 +58,8 @@
   let outputImages = $state({})
 
   function pollOutputs(lastRun) {
-    if (!lastRun) return
+    if (!lastRun) return;
+    currentOutputs = {} // clear outputs
 
     polling = setInterval(async () => {
       const info = await api.history(lastRun.prompt_id)
