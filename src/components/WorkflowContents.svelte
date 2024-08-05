@@ -4,6 +4,7 @@
   import { connectWorkflowManager } from "../stores/workflowManager.svelte"
   import { api, STATUS } from "../stores/apiConnectionManager.svelte"
   import { runner } from "../stores/workflowRunnerManager.svelte"
+  import { cache } from "../stores/imageCache.svelte"
 
   const manager = connectWorkflowManager()
 
@@ -57,6 +58,8 @@
   let outputImages = $state({})
 
   function pollOutputs(lastRun) {
+    if (!lastRun) return
+
     polling = setInterval(async () => {
       const info = await api.history(lastRun.prompt_id)
       if (!Object.keys(info).length) {
@@ -97,11 +100,34 @@
   async function pollImages(rawOutputs) {
     const out = {}
     const fmt = await Promise.all(
-      formatImageQueries(rawOutputs).map(async ([nodeId, key, attributes]) => {
+      formatImageQueries(rawOutputs).map(async ([nodeId, nodeKey, attributes], nodeOutputIdx) => {
+        const dbValues = [
+          manager.workflowName,
+          nodeId,
+          nodeKey,
+          nodeOutputIdx,
+          attributes.type,
+          attributes.filename
+        ]
+
+        const cachedResult = await cache.getImage(dbValues.join("."))
+        if (cachedResult) {
+          return [
+            cachedResult.nodeId,
+            nodeKey,
+            attributes.filename,
+            URL.createObjectURL(cachedResult.blob)
+          ]
+        }
+
+        // else, cache miss
+
         const blob = await api.view(attributes)
+        await cache.saveImage(dbValues.join("."), ...dbValues, blob)
+
         return [
           nodeId,
-          key,
+          nodeKey,
           attributes.filename,
           URL.createObjectURL(blob)
         ]
