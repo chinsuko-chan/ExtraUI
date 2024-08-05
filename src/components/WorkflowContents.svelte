@@ -54,8 +54,8 @@
   let polling = -1
   let pollingDelay = 150
   let currentOutputs = $state({})
+  let outputImages = $state({})
 
-  /** @todo cache with indexedDB */
   function pollOutputs(lastRun) {
     polling = setInterval(async () => {
       const info = await api.history(lastRun.prompt_id)
@@ -71,12 +71,60 @@
     }, pollingDelay)
   }
 
+
+
+  /** @todo cache with indexedDB */
+  function formatImageQueries(rawOutputs) {
+    // cba to work with deeply nested Promise.all rn
+    const flattened = []
+    Object.entries(rawOutputs).forEach(([nodeId, outputs]) => {
+      Object.entries(outputs).forEach(([key, imagesArray]) => {
+        imagesArray.forEach((attributes) => {
+          flattened.push(
+            [
+              nodeId,
+              key,
+              attributes
+            ]
+          )
+        })
+      })
+    })
+
+    return flattened
+  }
+
+  async function pollImages(rawOutputs) {
+    const out = {}
+    const fmt = await Promise.all(
+      formatImageQueries(rawOutputs).map(async ([nodeId, key, attributes]) => {
+        const blob = await api.view(attributes)
+        return [
+          nodeId,
+          key,
+          attributes.filename,
+          URL.createObjectURL(blob)
+        ]
+      })
+    )
+    fmt.forEach(([id, key, fname, blob]) => {
+      out[id] ||= {}
+      out[id][key] ||= []
+      out[id][key].push([fname, blob])
+    })
+
+    outputImages = out
+  }
+
   /** poll when most recent run changes and idle */
   $effect(() => {
     if (api.status === STATUS.IDLE) return pollOutputs(runner.lastRun)
   })
 
-  $inspect(currentOutputs)
+  /** fetch images when output state changes */
+  $effect(() => {
+    if (Object.keys(currentOutputs).length) return pollImages(currentOutputs)
+  })
 </script>
 
 {#snippet inputsListItem(key, displayValue)}
@@ -92,11 +140,18 @@
   </li>
 {/snippet}
 
-{#snippet outputsListItem(key, displayValue)}
+{#snippet outputsListItem(id, key, displayValue)}
   <li>
     <div class="flex flex-col gap-2 p-2">
       <code class="badge badge-outline badge-primary">{key}</code>
       <span>{displayValue}</span>
+      <div>
+        {#if outputImages[id] && outputImages[id][key] && outputImages[id][key].length}
+          {#each outputImages[id][key] as [fname, src]}
+            <img src={src} alt={fname}>
+          {/each}
+        {/if}
+      </div>
     </div>
   </li>
 {/snippet}
@@ -120,7 +175,11 @@
       <li>
         {@render leadingHr(index)}
         <div class="timeline-middle">
-          <button class="btn btn-outline btn-xs btn-circle" onclick={() => toggleNode(id)}>
+          <button
+            class="btn btn-xs btn-circle"
+            class:btn-outline={!currentOutputs[id] || expandedState.current[id]}
+            class:btn-primary={currentOutputs[id]}
+            onclick={() => toggleNode(id)}>
             {id}
           </button>
         </div>
@@ -128,7 +187,6 @@
           class="timeline-end"
           class:ml-4={!expandedState.current[id]}
           class:timeline-box={expandedState.current[id]}
-          class:border-primary={currentOutputs[id]}
         >
           <section>
             <h2 id={`node-${id}`}>
@@ -152,7 +210,7 @@
                 <h3 class="font-bold">Outputs</h3>
                 <ul>
                   {#each formatInputs(currentOutputs[id]) as [key, val]}
-                    {@render outputsListItem(key, val)}
+                    {@render outputsListItem(id, key, val)}
                   {/each}
                 </ul>
               {/if}

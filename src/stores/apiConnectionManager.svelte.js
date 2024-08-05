@@ -133,4 +133,18 @@ export const api = {
       return {}
     }
   },
+  /** GET /view */
+  async view({ filename, type, subfolder = "" }) {
+    const params = { filename, type }
+    if (subfolder.length) params.subfolder = subfolder
+    const qs = new URLSearchParams(params)
+    const request = new Request(`http://${serverUri}/view?${qs}`)
+    try {
+      const resp = await fetch(request)
+      return await resp.blob()
+    } catch (e) {
+      console.error(e)
+      return {}
+    }
+  },
 }
