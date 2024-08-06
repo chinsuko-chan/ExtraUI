@@ -133,8 +133,8 @@
     class:w-full={expandedState.isExpanded(id, key)}
     class:mb-4={expandedState.isExpanded(id, key)}
     class:border={expandedState.isExpanded(id, key)}
-    class:border-neutral-content={expandedState.isExpanded(id, key)}
-    class:shadow-xl={expandedState.isExpanded(id, key)}
+    class:border-secondary={expandedState.isExpanded(id, key) && manager.hasModifiedInput(id, key)}
+    class:shadow-md={expandedState.isExpanded(id, key)}
     class:rounded-md={expandedState.isExpanded(id, key)}
   >
     <div
@@ -142,21 +142,31 @@
       class:collapse-arrow={expandedState.isExpanded(id, key)}
     >
       <input
-        class={expandedState.isExpanded(id, key) ? null : "absolute inset hover:btn-outline"}
+        class={expandedState.isExpanded(id, key) ? null : "absolute inset"}
         type="checkbox"
         checked={expandedState.isExpanded(id, key)}
         onchange={() => toggleInput(id, key)}
       />
       <div
-        class="collapse-title flex items-center min-h-4"
+        class="collapse-title flex items-center min-h-4 hover:bg-primary"
         class:p-2={!expandedState.isExpanded(id, key)}
         class:mb-4={expandedState.isExpanded(id, key)}
       >
-        <code class={expandedState.isExpanded(id, key) ? null : "btn btn-xs dark:border-neutral-content"}>{key}</code>
+        <code
+          class={manager.hasModifiedInput(id, key) ? null : "dark:border-neutral-content"}
+          class:btn={!expandedState.isExpanded(id, key)}
+          class:btn-xs={!expandedState.isExpanded(id, key)}
+          class:btn-outline={manager.hasModifiedInput(id, key)}
+          class:btn-secondary={manager.hasModifiedInput(id, key)}
+        >{key}</code>
       </div>
       {#if expandedState.isExpanded(id, key)}
         <div class="collapse-content">
-          <InputContentEditor value={value} />
+          <InputContentEditor
+            nodeId={id}
+            inputKey={key}
+            originalValue={value}
+          />
         </div>
       {/if}
     </div>
@@ -197,7 +207,9 @@
     {#each nodeEntries as [id, node], index}
       <li>
         {@render leadingHr(index)}
-        <div class="timeline-middle">
+        <div
+          class="timeline-middle"
+        >
           <button
             class="btn btn-xs btn-circle"
             class:btn-outline={!currentOutputs[id] || expandedState.current[id]}
@@ -210,6 +222,7 @@
           class="timeline-end"
           class:ml-4={!expandedState.current[id]}
           class:timeline-box={expandedState.current[id]}
+          class:w-full={Object.keys(expandedState.current[id] || {}).length}
         >
           <section>
             <h2 id={`node-${id}`}>
