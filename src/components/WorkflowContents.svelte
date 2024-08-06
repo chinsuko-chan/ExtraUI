@@ -1,10 +1,12 @@
 <script>
-  const KEY = "goodUI.views.workflowContentsExpandedNodes"
+  import InputContentEditor from "./InputContentEditor.svelte"
 
   import { connectWorkflowManager } from "../stores/workflowManager.svelte"
   import { api, STATUS } from "../stores/apiConnectionManager.svelte"
   import { runner } from "../stores/workflowRunnerManager.svelte"
   import { cache } from "../stores/imageCache.svelte"
+
+  import { expandedState } from "../viewState/workflowContentsState.svelte"
 
   const manager = connectWorkflowManager()
 
@@ -12,43 +14,15 @@
     return nodeObject._meta?.title || nodeObject.class_type
   }
 
-  /** @todo maybe something better than JSON.stringify */
-  function formatInputs(inputsObject) {
-    return Object.entries(inputsObject).map(([key, value]) => {
-      return [key, JSON.stringify(value)]
-    })
-  }
-
   let nodeEntries = $derived(Object.entries(manager.current || {}))
-  let allExpandedNodes = $state(JSON.parse(localStorage.getItem(KEY) || "{}"))
 
-  /** @todo move to stores? annoying af here */
-  let expandedState = {
-    get current() {
-      return allExpandedNodes[manager.workflowName] || {}
-    },
-    toggle(id) {
-      const currentState = allExpandedNodes[manager.workflowName]
-
-      if (!currentState) {
-        return allExpandedNodes[manager.workflowName] = {
-          [id]: 1
-        }
-      }
-
-      if (currentState && currentState[id]) {
-        delete allExpandedNodes[manager.workflowName][id]
-      } else {
-        allExpandedNodes[manager.workflowName][id] = 1
-      }
-    },
-    save() {
-      localStorage.setItem(KEY, JSON.stringify(allExpandedNodes))
-    }
+  function toggleNode(nodeId) {
+    expandedState.toggleNode(nodeId)
+    expandedState.save()
   }
 
-  function toggleNode(id) {
-    expandedState.toggle(id)
+  function toggleInput(nodeId, inputKey) {
+    expandedState.toggleInput(nodeId, inputKey)
     expandedState.save()
   }
 
@@ -154,16 +128,38 @@
   })
 </script>
 
-{#snippet inputsListItem(key, displayValue)}
-  <li>
-    <details class="collapse">
-      <summary class="collapse-title p-2 min-h-8">
-        <code class="btn btn-xs rounded-xl dark:border-base-content">{key}</code>
-      </summary>
-      <div class="collapse-content">
-        <span>{displayValue}</span>
+{#snippet inputsListItem(id, key, value)}
+  <li
+    class:w-full={expandedState.isExpanded(id, key)}
+    class:mb-4={expandedState.isExpanded(id, key)}
+    class:border={expandedState.isExpanded(id, key)}
+    class:border-neutral-content={expandedState.isExpanded(id, key)}
+    class:shadow-xl={expandedState.isExpanded(id, key)}
+    class:rounded-md={expandedState.isExpanded(id, key)}
+  >
+    <div
+      class="collapse min-h-4 relative"
+      class:collapse-arrow={expandedState.isExpanded(id, key)}
+    >
+      <input
+        class={expandedState.isExpanded(id, key) ? null : "absolute inset hover:btn-outline"}
+        type="checkbox"
+        checked={expandedState.isExpanded(id, key)}
+        onchange={() => toggleInput(id, key)}
+      />
+      <div
+        class="collapse-title flex items-center min-h-4"
+        class:p-2={!expandedState.isExpanded(id, key)}
+        class:mb-4={expandedState.isExpanded(id, key)}
+      >
+        <code class={expandedState.isExpanded(id, key) ? null : "btn btn-xs dark:border-neutral-content"}>{key}</code>
       </div>
-    </details>
+      {#if expandedState.isExpanded(id, key)}
+        <div class="collapse-content">
+          <InputContentEditor value={value} />
+        </div>
+      {/if}
+    </div>
   </li>
 {/snippet}
 
@@ -228,16 +224,16 @@
 
             {#if expandedState.current[id]}
               <h3 class="font-bold">Inputs</h3>
-              <ul>
-                {#each formatInputs(node.inputs) as [key, val]}
-                  {@render inputsListItem(key, val)}
+              <ul class="flex flex-wrap">
+                {#each Object.entries(node.inputs) as [key, val]}
+                  {@render inputsListItem(id, key, val)}
                 {/each}
               </ul>
               {#if currentOutputs[id]}
                 <h3 class="font-bold">Outputs</h3>
                 <ul>
-                  {#each formatInputs(currentOutputs[id]) as [key, val]}
-                    {@render outputsListItem(id, key, val)}
+                  {#each Object.entries(currentOutputs[id]) as [key, val]}
+                    {@render outputsListItem(id, key, JSON.stringify(val))}
                   {/each}
                 </ul>
               {/if}
@@ -249,14 +245,3 @@
     {/each}
   </ul>
 </article>
-
-<style lang="postcss">
-  /* is there better way...? */
-  details[open] {
-    summary {
-      code.btn {
-        @apply border-secondary text-secondary bg-transparent;
-      }
-    }
-  }
-</style>
