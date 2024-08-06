@@ -1,12 +1,11 @@
 <script>
-  import InputContentEditor from "./InputContentEditor.svelte"
-
   import { connectWorkflowManager } from "../stores/workflowManager.svelte"
-  import { api, STATUS } from "../stores/apiConnectionManager.svelte"
   import { runner } from "../stores/workflowRunnerManager.svelte"
-  import { cache } from "../stores/imageCache.svelte"
+  import { outputs } from "../stores/outputsManager.svelte"
 
   import { expandedState } from "../viewState/workflowContentsState.svelte"
+
+  import InputContentEditor from "./InputContentEditor.svelte"
 
   const manager = connectWorkflowManager()
 
@@ -26,120 +25,15 @@
     expandedState.save()
   }
 
-  let polling = -1
-  let pollingDelay = 150
-  let currentOutputs = $state({})
-  let outputImages = $state({})
-
-  function pollOutputs(lastRun) {
-    if (!lastRun) return;
-    currentOutputs = {} // clear outputs
-
-    polling = setInterval(async () => {
-      const info = await api.history(lastRun.prompt_id)
-      if (!Object.keys(info).length) {
-        pollingDelay *= 2 // simple backoff 4 now
-        return // no result yet
-      }
-
-      currentOutputs = info[lastRun.prompt_id].outputs
-
-      pollingDelay = 150 // reset
-      clearInterval(polling)
-    }, pollingDelay)
-  }
-
-
-
-  /** @todo cache with indexedDB */
-  function formatImageQueries(rawOutputs) {
-    // cba to work with deeply nested Promise.all rn
-    const flattened = []
-    Object.entries(rawOutputs).forEach(([nodeId, outputs]) => {
-      Object.entries(outputs).forEach(([key, imagesArray]) => {
-        imagesArray.forEach((attributes) => {
-          flattened.push(
-            [
-              nodeId,
-              key,
-              attributes
-            ]
-          )
-        })
-      })
-    })
-
-    return flattened
-  }
-
-  async function pollImages(rawOutputs) {
-    const out = {}
-    const fmt = await Promise.all(
-      formatImageQueries(rawOutputs).map(async ([nodeId, nodeKey, attributes], nodeOutputIdx) => {
-        const dbValues = [
-          manager.workflowName,
-          nodeId,
-          nodeKey,
-          nodeOutputIdx,
-          attributes.type,
-          attributes.filename
-        ]
-
-        const key = dbValues.join(".")
-        const cachedResult = await cache.getImage(key)
-        if (cachedResult) {
-          return [
-            cachedResult.nodeId,
-            nodeKey,
-            attributes.filename,
-            URL.createObjectURL(cachedResult.blob)
-          ]
-        }
-
-        // else, cache miss
-
-        const blob = await api.view(attributes)
-        const fullFlow = JSON.parse(JSON.stringify(manager.current)) // must dupe
-        const insertValues = {
-          key,
-          workflowName: manager.workflowName,
-          nodeId,
-          nodeKey,
-          nodeOutputIdx,
-          type: attributes.type,
-          filename: attributes.filename,
-          blob,
-          workflow: fullFlow,
-          workflowSearch: JSON.stringify(fullFlow)
-        }
-
-        await cache.saveImage({ ...insertValues })
-
-        return [
-          nodeId,
-          nodeKey,
-          attributes.filename,
-          URL.createObjectURL(blob)
-        ]
-      })
-    )
-    fmt.forEach(([id, key, fname, blob]) => {
-      out[id] ||= {}
-      out[id][key] ||= []
-      out[id][key].push([fname, blob])
-    })
-
-    outputImages = out
-  }
-
-  /** poll when most recent run changes and idle */
+  /** poll when most recent run changes */
   $effect(() => {
-    if (api.status === STATUS.IDLE) return pollOutputs(runner.lastRun)
+    if (runner?.lastRun?.prompt_id)
+      return outputs.poll(runner.lastRun.prompt_id)
   })
 
   /** fetch images when output state changes */
   $effect(() => {
-    if (Object.keys(currentOutputs).length) return pollImages(currentOutputs)
+    if (Object.keys(outputs.mostRecent).length) return outputs.pollImages(outputs.mostRecent)
   })
 </script>
 
@@ -193,8 +87,8 @@
     <div class="flex flex-col gap-2 p-2">
       <code class="badge badge-outline badge-primary">{key}</code>
       <div>
-        {#if outputImages[id] && outputImages[id][key] && outputImages[id][key].length}
-          {#each outputImages[id][key] as [fname, src]}
+        {#if outputs.mostRecentImages[id] && outputs.mostRecentImages[id][key] && outputs.mostRecentImages[id][key].length}
+        {#each outputs.mostRecentImages[id][key] as [fname, src]}
             <img src={src} alt={fname}>
           {/each}
         {:else}
@@ -231,8 +125,8 @@
         >
           <button
             class="btn btn-xs btn-circle"
-            class:btn-outline={!currentOutputs[id] || expandedState.current[id]}
-            class:btn-primary={currentOutputs[id]}
+            class:btn-outline={!outputs.mostRecent[id] || expandedState.current[id]}
+            class:btn-primary={outputs.mostRecent[id]}
             onclick={() => toggleNode(id)}>
             {id}
           </button>
@@ -261,10 +155,10 @@
                   {@render inputsListItem(id, key, val)}
                 {/each}
               </ul>
-              {#if currentOutputs[id]}
+              {#if outputs.mostRecent[id]}
                 <h3 class="font-bold">Outputs</h3>
                 <ul>
-                  {#each Object.entries(currentOutputs[id]) as [key, val]}
+                  {#each Object.entries(outputs.mostRecent[id]) as [key, val]}
                     {@render outputsListItem(id, key, JSON.stringify(val))}
                   {/each}
                 </ul>

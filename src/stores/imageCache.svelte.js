@@ -1,35 +1,38 @@
 const KEY = "goodUI.stores.imageCache"
 const DB_VERSION = 1
 
-let db = $state()
-const request = indexedDB.open(KEY, DB_VERSION)
+const initDb = () => {
+  const request = indexedDB.open(KEY, DB_VERSION)
+  request.onupgradeneeded = (e) => {
+    console.log("upgrade finished.")
+    const database = e.target.result
 
-// create handlers
-const onsuccess = (e) => (db = e.target.result)
-const onupgradeneeded = (e) => {
-  console.log("upgrade finished.")
-  const database = e.target.result
+    /**
+     * rows look like dis:
+     * [ key, workflow_name, node_id, node_output_key, node_output_idx, type, filename, blob, workflow, workflowSearch ]
+     *
+     * key (string) shape = "workflow.node_id.node_output_key.node_output_idx.type.filename"
+     */
+    const imageStore = database.createObjectStore("images", { keyPath: "key" })
 
-  /**
-   * rows look like dis:
-   * [ key, workflow_name, node_id, node_output_key, node_output_idx, type, filename, blob, workflow, workflowSearch ]
-   *
-   * key (string) shape = "workflow.node_id.node_output_key.node_output_idx.type.filename"
-   */
-  const imageStore = database.createObjectStore("images", { keyPath: "key" })
+    /** index workflow name */
+    imageStore.createIndex("workflowName", "workflowName", { unique: false })
 
-  /** index workflow name */
-  imageStore.createIndex("workflowName", "workflowName", { unique: false })
+    /** index a stringified version of the workflow */
+    imageStore.createIndex("workflowSearch", "workflowSearch", {
+      unique: false,
+    })
 
-  /** index a stringified version of the workflow */
-  imageStore.createIndex("workflowSearch", "workflowSearch", { unique: false })
+    imageStore.transaction.oncomplete = (e) => console.log("done.", e)
+  }
 
-  imageStore.transaction.oncomplete = (e) => console.log("done.", e)
+  return new Promise((resolve, _reject) => {
+    // result here is the db itself
+    request.onsuccess = (e) => resolve(e.target.result)
+  })
 }
 
-// assign handlers
-request.onsuccess = onsuccess
-request.onupgradeneeded = onupgradeneeded
+const db = await initDb()
 
 export const cache = {
   get db() {
