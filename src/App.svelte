@@ -13,6 +13,7 @@
   import WorkflowRunButton from "./components/WorkflowRunButton.svelte"
   import ApiConfigModal from "./components/ApiConfigModal.svelte"
 
+  import { connectWorkflowManager } from "./stores/workflowManager.svelte"
   import { api, STATUS } from "./stores/apiConnectionManager.svelte"
   let apiStatus = $derived.by(() => {
     if (api.status === STATUS.CONNECTING) return "Connecting"
@@ -23,9 +24,23 @@
   })
   let apiConfigModal = $state()
 
+  const manager = connectWorkflowManager()
+
   onMount(() => {
     if (api.autoconnect) api.connect()
   })
+
+  function confirmSave() {
+    if (confirm(`This will update the inputs for "${manager.workflowName}", continue?`)) {
+      manager.save()
+      manager.refresh()
+    }
+  }
+
+  function revertWorkflow() {
+    manager.revertWorkflow() // 1
+    manager.revertChanges() // 2 (uses values from step 1)
+  }
 </script>
 
 {#snippet sidebar()}
@@ -209,8 +224,29 @@
       </label>
     </div>
 
-    <div class="navbar-center flex-grow">
+    <div class="navbar-center flex-grow gap-2">
       <WorkflowSelector />
+      {#if manager.current}
+        {#if manager.hasUncommittedChanges}
+          <button
+            class="btn btn-sm btn-ghost"
+            onclick={manager.revertChanges}
+          >Clear</button>
+          <button
+            class="btn btn-sm btn-outline btn-warning"
+            onclick={manager.commitChanges}
+          >Commit Changes</button>
+        {:else if manager.hasUnsavedChanges}
+          <button
+            class="btn btn-sm btn-outline btn-error"
+            onclick={revertWorkflow}
+          >Revert</button>
+          <button
+            class="btn btn-sm btn-warning"
+            onclick={confirmSave}
+          >Save</button>
+        {/if}
+      {/if}
     </div>
 
     <div class="navbar-end">

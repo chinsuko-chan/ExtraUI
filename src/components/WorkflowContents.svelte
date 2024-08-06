@@ -133,7 +133,7 @@
     class:w-full={expandedState.isExpanded(id, key)}
     class:mb-4={expandedState.isExpanded(id, key)}
     class:border={expandedState.isExpanded(id, key)}
-    class:border-secondary={expandedState.isExpanded(id, key) && manager.hasModifiedInput(id, key)}
+    class:border-secondary={expandedState.isExpanded(id, key) && manager.isModifiedInput(id, key)}
     class:shadow-md={expandedState.isExpanded(id, key)}
     class:rounded-md={expandedState.isExpanded(id, key)}
   >
@@ -153,11 +153,11 @@
         class:mb-4={expandedState.isExpanded(id, key)}
       >
         <code
-          class={manager.hasModifiedInput(id, key) ? null : "dark:border-neutral-content"}
+          class={manager.isModifiedInput(id, key) ? null : "dark:border-neutral-content"}
           class:btn={!expandedState.isExpanded(id, key)}
           class:btn-xs={!expandedState.isExpanded(id, key)}
-          class:btn-outline={manager.hasModifiedInput(id, key)}
-          class:btn-secondary={manager.hasModifiedInput(id, key)}
+          class:btn-outline={manager.isModifiedInput(id, key)}
+          class:btn-secondary={manager.isModifiedInput(id, key)}
         >{key}</code>
       </div>
       {#if expandedState.isExpanded(id, key)}
@@ -177,12 +177,16 @@
   <li>
     <div class="flex flex-col gap-2 p-2">
       <code class="badge badge-outline badge-primary">{key}</code>
-      <span>{displayValue}</span>
       <div>
         {#if outputImages[id] && outputImages[id][key] && outputImages[id][key].length}
           {#each outputImages[id][key] as [fname, src]}
             <img src={src} alt={fname}>
           {/each}
+        {:else}
+          <!-- ambiguous element... curious... -->
+          <div class="bg-base-200 w-full px-4 py-2 rounded-md">
+            <code>{displayValue}</code>
+          </div>
         {/if}
       </div>
     </div>

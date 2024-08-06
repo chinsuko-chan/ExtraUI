@@ -1,4 +1,6 @@
 <script>
+    import { onMount } from 'svelte'
+
   // (observation) workflow inputs are usually:
   // - json value (eg. string, int)
   // - array
@@ -20,6 +22,27 @@
     if (!manager.inputValue || manager.inputValue === "") return false
 
     return manager.inputValue !== originalValue
+  })
+
+  let editable = $derived.by(() => {
+    if (typeof originalValue === "number") return true
+    if (typeof originalValue === "string") return true
+    return false
+  })
+
+  onMount(() => {
+    /**
+     * This is so f'n hard to explain... but here goes:
+     * @gotcha #1 edits are a separate state, so value can be blank, BUT
+     * @gotcha #2 bcuz edits two-way bound, CANNOT assign the value in an effect
+     *            (else we get infinite loop), so we must put it on mount, BUT!
+     * @gotcha #3 the edit state persists even after collapsing this component.
+     *            SO, we must check if value was already persisted before, else
+     *            every time the component is collapsed the edit is lost.
+     */
+    if (editable && !manager.inputValue) {
+      manager.inputValue = originalValue
+    }
   })
 </script>
 
