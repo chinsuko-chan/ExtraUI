@@ -85,7 +85,8 @@
           attributes.filename
         ]
 
-        const cachedResult = await cache.getImage(dbValues.join("."))
+        const key = dbValues.join(".")
+        const cachedResult = await cache.getImage(key)
         if (cachedResult) {
           return [
             cachedResult.nodeId,
@@ -98,7 +99,21 @@
         // else, cache miss
 
         const blob = await api.view(attributes)
-        await cache.saveImage(dbValues.join("."), ...dbValues, blob)
+        const fullFlow = JSON.parse(JSON.stringify(manager.current)) // must dupe
+        const insertValues = {
+          key,
+          workflowName: manager.workflowName,
+          nodeId,
+          nodeKey,
+          nodeOutputIdx,
+          type: attributes.type,
+          filename: attributes.filename,
+          blob,
+          workflow: fullFlow,
+          workflowSearch: JSON.stringify(fullFlow)
+        }
+
+        await cache.saveImage({ ...insertValues })
 
         return [
           nodeId,
@@ -184,8 +199,8 @@
           {/each}
         {:else}
           <!-- ambiguous element... curious... -->
-          <div class="bg-base-200 w-full px-4 py-2 rounded-md">
-            <code>{displayValue}</code>
+          <div class="bg-base-200 w-full px-4 py-2 rounded-md break-all">
+            <code class="text-sm">{displayValue}</code>
           </div>
         {/if}
       </div>

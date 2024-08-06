@@ -1,7 +1,7 @@
 const KEY = "goodUI.stores.imageCache"
 const DB_VERSION = 1
 
-let db
+let db = $state()
 const request = indexedDB.open(KEY, DB_VERSION)
 
 // create handlers
@@ -12,14 +12,17 @@ const onupgradeneeded = (e) => {
 
   /**
    * rows look like dis:
-   * [ key, workflow, node_id, node_output_key, node_output_idx, type, filename, blob ]
+   * [ key, workflow_name, node_id, node_output_key, node_output_idx, type, filename, blob, workflow, workflowSearch ]
    *
    * key (string) shape = "workflow.node_id.node_output_key.node_output_idx.type.filename"
    */
   const imageStore = database.createObjectStore("images", { keyPath: "key" })
 
   /** index workflow name */
-  imageStore.createIndex("workflow", "workflow", { unique: false })
+  imageStore.createIndex("workflowName", "workflowName", { unique: false })
+
+  /** index a stringified version of the workflow */
+  imageStore.createIndex("workflowSearch", "workflowSearch", { unique: false })
 
   imageStore.transaction.oncomplete = (e) => console.log("done.", e)
 }
@@ -40,7 +43,7 @@ export const cache = {
       imgRequest.onerror = () => reject({})
     })
   },
-  saveImage(
+  saveImage({
     key,
     workflowName,
     nodeId,
@@ -49,8 +52,11 @@ export const cache = {
     type,
     filename,
     blob,
-  ) {
-    const shape = {
+    workflow,
+    workflowSearch,
+  }) {
+    const txn = db.transaction(["images"], "readwrite")
+    const imgRequest = txn.objectStore("images").add({
       key,
       workflowName,
       nodeId,
@@ -59,9 +65,10 @@ export const cache = {
       type,
       filename,
       blob,
-    }
-    const txn = db.transaction(["images"], "readwrite")
-    const imgRequest = txn.objectStore("images").add(shape)
+      workflow,
+      workflowSearch,
+    })
+
     return new Promise((resolve, reject) => {
       // result here is the key
       imgRequest.onsuccess = (e) => resolve(e.target.result)
