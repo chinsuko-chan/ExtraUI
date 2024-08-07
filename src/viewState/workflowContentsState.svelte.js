@@ -14,6 +14,14 @@ let current = $derived(allExpandedNodes[manager.workflowName])
 //     -> node_id
 //         -> input_key = bool
 
+export function isInputExpanded(nodeId, inputKey) {
+  if (!current) return false
+  if (!current[nodeId]) return false
+  if (!current[nodeId][inputKey]) return false
+
+  return current[nodeId][inputKey]
+}
+
 export const expandedState = {
   get current() {
     return current || {}
@@ -54,16 +62,6 @@ export const expandedState = {
     }
 
     return (allExpandedNodes = shape)
-  },
-  isExpanded(nodeId, inputKey = undefined) {
-    // helper fn for both node & inputs
-    if (!current) return false
-    if (!current[nodeId]) return false
-    if (current[nodeId]) {
-      if (!inputKey) return true
-
-      return current[nodeId][inputKey]
-    }
   },
   save() {
     localStorage.setItem(KEY, JSON.stringify(allExpandedNodes))

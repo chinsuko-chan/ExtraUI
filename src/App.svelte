@@ -9,7 +9,7 @@
 
   import WorkflowSelector from "./components/WorkflowSelector.svelte"
   import WorkflowUploadButton from "./components/WorkflowUploadButton.svelte"
-  import WorkflowContents from "./components/WorkflowContents.svelte"
+  import WorkflowEditor from "./components/WorkflowEditor"
   import WorkflowRunButton from "./components/WorkflowRunButton.svelte"
   import ApiConfigModal from "./components/ApiConfigModal.svelte"
   import NavigationPermalinks from "./components/NavigationPermalinks.svelte"
@@ -27,7 +27,7 @@
   let apiConfigModal = $state()
 
   const manager = connectWorkflowManager()
-  let nodeEntries = $derived(Object.entries(manager.current || {}))
+  let nodeEntries = $derived(Object.entries(manager.currentWorkflow || {}))
 
   onMount(() => {
     if (api.autoconnect) api.connect()
@@ -89,7 +89,7 @@
 
     <div class="navbar-center flex-grow gap-2">
       <WorkflowSelector />
-      {#if manager.current}
+      {#if manager.currentWorkflow}
         {#if manager.hasUncommittedChanges}
           <button
             class="btn btn-sm btn-ghost"
@@ -133,7 +133,7 @@
       {@render navbar()}
       <!-- tabs will go here -->
       <hr class="my-5 opacity-0">
-      <WorkflowContents nodeEntries={nodeEntries} />
+      <WorkflowEditor nodeEntries={nodeEntries} />
     </div>
   </main>
   <ApiConfigModal bind:apiConfigModal={apiConfigModal} />

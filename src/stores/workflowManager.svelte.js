@@ -1,25 +1,27 @@
 /** save/load known workflows to localstorage */
 
-const WORKFLOWS_KEY = "goodUI.stores.workflowManager.workflows"
 const WORKFLOW_NAME_KEY = "goodUI.stores.workflowManager.workflowName"
-const WORKFLOW_CHANGES_KEY = "goodUI.stores.workflowManager.workflowChanges"
+const ALL_WORKFLOWS_KEY = "goodUI.stores.workflowManager.allWorkflows"
+const ALL_CHANGES_KEY = "goodUI.stores.workflowManager.allChanges"
 
-let workflows = $state(JSON.parse(localStorage.getItem(WORKFLOWS_KEY) || "{}"))
 let workflowName = $state(
   JSON.parse(localStorage.getItem(WORKFLOW_NAME_KEY) || '""'),
 )
+let allWorkflows = $state(
+  JSON.parse(localStorage.getItem(ALL_WORKFLOWS_KEY) || "{}"),
+)
 let allChanges = $state(
-  JSON.parse(localStorage.getItem(WORKFLOW_CHANGES_KEY) || "{}"),
+  JSON.parse(localStorage.getItem(ALL_CHANGES_KEY) || "{}"),
 )
 
 /** currently selected workflow from dropdown */
-let current = $derived(workflows[workflowName])
-let changes = $derived(allChanges[workflowName])
+let currentWorkflow = $derived(allWorkflows[workflowName])
+let currentChanges = $derived(allChanges[workflowName])
 
 function sameInputs(nodeId, inputKey) {
   let originalValue
   try {
-    originalValue = workflows[workflowName][nodeId].inputs[inputKey]
+    originalValue = allWorkflows[workflowName][nodeId].inputs[inputKey]
   } catch {
     console.warn(
       `Specified node+input combo does not exist for workflow ${workflowName}: (id = ${nodeId} , key = ${inputKey})`,
@@ -119,27 +121,27 @@ export function connectWorkflowManager(nodeId = null, inputKey = null) {
     set workflowName(newName) {
       workflowName = newName
     },
-    get workflows() {
-      return workflows
+    get allWorkflows() {
+      return allWorkflows
     },
-    set workflows(newFlows) {
-      workflows = newFlows
+    set allWorkflows(newFlows) {
+      allWorkflows = newFlows
     },
-    get current() {
-      return current
+    get currentWorkflow() {
+      return currentWorkflow
     },
     get inputValue() {
       if (!nodeId || !inputKey) throw new Error("Must connect with node+input")
 
-      if (!changes) return ""
-      if (!changes[nodeId]) return ""
-      if (!Object.keys(changes[nodeId].inputs).length) return ""
-      return changes[nodeId].inputs[inputKey] || ""
+      if (!currentChanges) return ""
+      if (!currentChanges[nodeId]) return ""
+      if (!Object.keys(currentChanges[nodeId].inputs).length) return ""
+      return currentChanges[nodeId].inputs[inputKey] || ""
     },
     set inputValue(newValue) {
       if (!nodeId || !inputKey) throw new Error("Must connect with node+input")
 
-      const newChanges = JSON.parse(JSON.stringify(changes || {}))
+      const newChanges = JSON.parse(JSON.stringify(currentChanges || {}))
 
       newChanges[nodeId] ||= { inputs: {} }
       if (!newValue) {
@@ -157,76 +159,83 @@ export function connectWorkflowManager(nodeId = null, inputKey = null) {
       key ||= inputKey
       if (!key) throw new Error("must specify input")
 
-      if (!changes) return false
-      if (!changes[id]) return false
-      if (!changes[id].inputs) return false
-      if (!changes[id].inputs[key]) return false
-      return changes[id].inputs[key] !== current[id].inputs[key]
+      if (!currentChanges) return false
+      if (!currentChanges[id]) return false
+      if (!currentChanges[id].inputs) return false
+      if (!currentChanges[id].inputs[key]) return false
+      return currentChanges[id].inputs[key] !== currentWorkflow[id].inputs[key]
     },
     hasAnyModifiedInput(id = null) {
       id ||= nodeId
       if (!id) throw new Error("must specify nodeID")
 
-      if (!changes) return false
-      if (!changes[id]) return false
-      if (!changes[id].inputs) return false
-      return Object.entries(changes[id].inputs).some(([key, _v]) => {
+      if (!currentChanges) return false
+      if (!currentChanges[id]) return false
+      if (!currentChanges[id].inputs) return false
+      return Object.entries(currentChanges[id].inputs).some(([key, _v]) => {
         return !sameInputs(id, key)
       })
     },
     /** \b changed since last known write */
     get hasUnsavedChanges() {
-      return JSON.stringify(workflows) !== localStorage.getItem(WORKFLOWS_KEY)
+      return (
+        JSON.stringify(allWorkflows) !== localStorage.getItem(ALL_WORKFLOWS_KEY)
+      )
     },
     /** edits do not match active workflow state */
     get hasUncommittedChanges() {
-      if (!changes) return false
+      if (!currentChanges) return false
 
       return (
         0 <
-        Object.keys(changes).reduce((count, id) => {
-          return (count += Object.keys(changes[id].inputs).filter((key) => {
-            return !sameInputs(id, key)
-          }).length)
+        Object.keys(currentChanges).reduce((count, id) => {
+          return (count += Object.keys(currentChanges[id].inputs).filter(
+            (key) => {
+              return !sameInputs(id, key)
+            },
+          ).length)
         }, 0)
       )
     },
     /** set workflow back to localStorage state */
     revertWorkflow() {
-      const orig = JSON.parse(localStorage.getItem(WORKFLOWS_KEY))
-      workflows[workflowName] = orig[workflowName]
+      const orig = JSON.parse(localStorage.getItem(ALL_WORKFLOWS_KEY))
+      allWorkflows[workflowName] = orig[workflowName]
     },
     /** undo edits (back to committed workflow values) */
     revertChanges() {
-      if (!changes) return
-      allChanges[workflowName] = undoChanges(current, changes)
+      if (!currentChanges) return
+      allChanges[workflowName] = undoChanges(currentWorkflow, currentChanges)
     },
     /** apply edits to workflow */
     commitChanges() {
-      if (!changes) return
+      if (!currentChanges) return
 
-      const onlyChanges = keepChanges(current, changes)
+      const onlyChanges = keepChanges(currentWorkflow, currentChanges)
       Object.entries(onlyChanges).forEach(([id, values]) => {
         Object.entries(values.inputs).forEach(([key, editValue]) => {
-          current[id] ||= { inputs: {} }
-          current[id].inputs[key] = editValue
+          currentWorkflow[id] ||= { inputs: {} }
+          currentWorkflow[id].inputs[key] = editValue
         })
       })
     },
     save() {
-      localStorage.setItem(WORKFLOWS_KEY, JSON.stringify(workflows))
       localStorage.setItem(WORKFLOW_NAME_KEY, JSON.stringify(workflowName))
+      localStorage.setItem(ALL_WORKFLOWS_KEY, JSON.stringify(allWorkflows))
       localStorage.setItem(
-        WORKFLOW_CHANGES_KEY,
+        ALL_CHANGES_KEY,
         JSON.stringify({
           ...allChanges,
-          [workflowName]: removeBlankOrEqualChanges(current, changes),
+          [workflowName]: removeBlankOrEqualChanges(
+            currentWorkflow,
+            currentChanges,
+          ),
         }),
       )
     },
     /** hacky fn so store values are updated */
     refresh() {
-      workflows = JSON.parse(JSON.stringify(workflows))
+      allWorkflows = JSON.parse(JSON.stringify(allWorkflows))
       allChanges = JSON.parse(JSON.stringify(allChanges))
     },
   }

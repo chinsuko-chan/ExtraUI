@@ -22,7 +22,7 @@
 
   /** actual logic here */
   function handleFiles(files) {
-    const newWorkflows = JSON.parse(JSON.stringify(manager.workflows))
+    const newWorkflows = JSON.parse(JSON.stringify(manager.allWorkflows))
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
       if (!file.type.startsWith("application/json")) continue
@@ -30,7 +30,7 @@
       const reader = new FileReader()
       reader.onload = (e) => {
         const key = file.name.replace(/\.json$/i, "")
-        if (manager.workflows[key]) {
+        if (manager.allWorkflows[key]) {
           const yes = confirm(
             `Workflow named "${key}" already exists, overwrite?`,
           )
@@ -38,7 +38,7 @@
         }
 
         newWorkflows[key] = JSON.parse(e.target.result)
-        manager.workflows = newWorkflows
+        manager.allWorkflows = newWorkflows
         manager.save()
       }
       reader.readAsText(file)

@@ -44,7 +44,7 @@ async function fetchImage({ nodeId, inputKey, attributes }) {
 
   // else, cache miss
   const blob = await api.view(attributes)
-  const fullFlow = JSON.parse(JSON.stringify(manager.current)) // must dupe
+  const fullFlow = JSON.parse(JSON.stringify(manager.currentWorkflow)) // must dupe
   const insertValues = {
     key,
     workflowName: manager.workflowName,

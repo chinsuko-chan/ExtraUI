@@ -13,10 +13,10 @@
   //
   // and creates an appropriate editable element based on the content
 
-  let { nodeId, inputKey, originalValue } = $props()
+  let { id, key, originalValue } = $props()
 
-  import { connectWorkflowManager } from '../stores/workflowManager.svelte'
-  const manager = connectWorkflowManager(nodeId, inputKey)
+  import { connectWorkflowManager } from "stores/workflowManager.svelte"
+  const manager = connectWorkflowManager(id, key)
 
   let edited = $derived.by(() => {
     if (!manager.inputValue || manager.inputValue === "") return false
