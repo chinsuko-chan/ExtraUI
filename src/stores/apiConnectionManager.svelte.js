@@ -33,6 +33,7 @@ let autoconnect = $state(
 )
 
 let socket
+let attemptingDisconnect = false
 let status = $state(STATUS.DISCONNECTED)
 let queueSize = $state(0)
 
@@ -59,6 +60,38 @@ const onMessage = (event) => {
     }
   }
 }
+const onError = () => {
+  /** @gotcha IDK wtf im doing wrong but close() ALWAYS causes an error  */
+  if (attemptingDisconnect) {
+    attemptingDisconnect = false
+    return (status = STATUS.DISCONNECTED)
+  }
+
+  status = STATUS.ERROR
+}
+
+function connect() {
+  socket?.close() // if doing reconnect
+  status = STATUS.CONNECTING
+  socket = new WebSocket(`ws://${serverUri}/ws?client_id=${CLIENT_ID}`)
+
+  // Add event listeners
+  socket.onopen = onOpen
+  socket.onmessage = onMessage
+  socket.onerror = onError
+}
+
+/** try, wait for 3s, then fail */
+function tryConnect() {
+  setTimeout(() => {
+    if (socket && socket.readyState === WebSocket.CONNECTING) {
+      attemptingDisconnect = false
+      socket.close(1000, "ur too slow bro")
+    }
+  }, 3000)
+
+  connect()
+}
 
 export const api = {
   get uri() {
@@ -70,9 +103,6 @@ export const api = {
   },
   get status() {
     return status
-  },
-  get socket() {
-    return socket
   },
   get ignorelist() {
     return ignorelist
@@ -91,25 +121,10 @@ export const api = {
   get isIdle() {
     return status === STATUS.IDLE
   },
-  connect() {
-    socket?.close() // if doing reconnect
-    status = STATUS.CONNECTING
-    try {
-      socket = new WebSocket(`ws://${serverUri}/ws?client_id=${CLIENT_ID}`)
-
-      // Add event listeners
-      socket.addEventListener("open", onOpen)
-      socket.addEventListener("message", onMessage)
-    } catch (e) {
-      console.error(e)
-      status = STATUS.ERROR
-    }
-  },
+  connect: tryConnect,
   disconnect() {
-    try {
-      socket?.close()
-    } catch {}
-    status = STATUS.DISCONNECTED
+    attemptingDisconnect = true
+    socket?.close()
   },
   /** POST payload to /prompt */
   async prompt(workflowObject) {
