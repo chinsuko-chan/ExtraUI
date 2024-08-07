@@ -1,7 +1,5 @@
 <script>
-  import { onMount, untrack } from "svelte"
-
-  // let { nodeEntries } = $props()
+  let { nodeEntries } = $props()
 
   import { connectWorkflowManager } from "../stores/workflowManager.svelte"
   import { runner } from "../stores/workflowRunnerManager.svelte"
@@ -12,7 +10,6 @@
   import InputContentEditor from "./InputContentEditor.svelte"
 
   const manager = connectWorkflowManager()
-  let nodeEntries = $derived(Object.entries(manager.current || {}))
 
   function formatTitle(nodeObject) {
     return nodeObject._meta?.title || nodeObject.class_type
@@ -49,11 +46,18 @@
     }
   })
 
-  /** focus node on first mount */
-  onMount(() => {
-    if (!location.hash) return
+  let canScroll = $state(true)
+
+  /** focus node on first mount, AFTER inputs are expanded */
+  $effect(() => {
+    if (!canScroll) return
+    if (!location.hash) return canScroll = false
     const node = document.querySelector(location.hash)
-    if (node) return node.scrollIntoView()
+    if (node) {
+      canScroll = false
+      /** @todo i think proper fix by decoupling initial expanded state on mount */
+      setTimeout(() => node.scrollIntoView(), 65) // 65ms found via the scientific method (brute force)
+    }
   })
 </script>
 
@@ -152,8 +156,10 @@
           </button>
         </div>
         <div
-          class="timeline-end"
-          class:ml-4={!expandedState.current[id]}
+          class="timeline-end border px-4 py-2"
+          class:mb-0={!expandedState.current[id]}
+          class:pb-0={!expandedState.current[id]}
+          class:border-transparent={!expandedState.current[id]}
           class:timeline-box={expandedState.current[id]}
           class:w-full={Object.keys(expandedState.current[id] || {}).length}
         >
@@ -191,3 +197,10 @@
     {/each}
   </ul>
 </article>
+
+<style>
+  h2 {
+    /* need confirm dis works on mobile */
+    scroll-margin-top: 4.5rem;
+  }
+</style>

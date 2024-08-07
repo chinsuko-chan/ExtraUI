@@ -58,7 +58,7 @@
   </div>
 {/snippet}
 
-<menu class="menu px-4 py-0">
+<menu class="menu px-4 py-2">
   {#each nodeEntries as [nodeId, node]}
     <li class="flex-grow-0 max-w-full">
       <a

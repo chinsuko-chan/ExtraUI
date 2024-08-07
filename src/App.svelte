@@ -47,7 +47,7 @@
 </script>
 
 {#snippet sidebar()}
-  <header class="sticky top-0 px-4 py-2 grid grid-rows-2 gap-4">
+  <header class="z-20 backdrop-blur-lg shadow-sm sticky top-0 p-4 grid grid-rows-2 gap-4">
     <div class="flex justify-between items-center gap-2">
       <h1 class="font-mono font-bold text-xl md:text-2xl">goodUI</h1>
       <button
@@ -65,9 +65,7 @@
     </div>
   </header>
   <div class="flex-grow">
-    <div>
-      <NavigationPermalinks nodeEntries={nodeEntries} />
-    </div>
+    <NavigationPermalinks nodeEntries={nodeEntries} />
   </div>
   <footer class="footer text-xs grid-rows-2 gap-2 p-4 px-8">
     <a class="link btn btn-sm btn-ghost font-normal flex items-center gap-2" href="https://github.com/chinsuko-chan/goodUI" target="_blank" rel="noopener">
@@ -82,7 +80,7 @@
 {/snippet}
 
 {#snippet navbar()}
-  <nav class="navbar gap-2 mb-12">
+  <nav class="navbar z-10 gap-2 bg-base-100 bg-opacity-80 shadow-sm backdrop-blur-lg sticky top-0">
     <div class="justify-start">
       <label for={DRAWER_ID} class="btn btn-ghost btn-circle lg:hidden">
         {@html menuSvg}
@@ -133,7 +131,9 @@
 
     <div class="drawer-content">
       {@render navbar()}
-      <WorkflowContents />
+      <!-- tabs will go here -->
+      <hr class="my-5 opacity-0">
+      <WorkflowContents nodeEntries={nodeEntries} />
     </div>
   </main>
   <ApiConfigModal bind:apiConfigModal={apiConfigModal} />
