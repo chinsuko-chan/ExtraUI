@@ -101,6 +101,7 @@ function removeBlankOrEqualChanges(original, edits) {
 /**
  * edits API:
  * - isModifiedInput: specified edit input != workflow input
+ * - hasAnyModifiedInput: specified node has any changes
  * - hasUnsavedChanges: workflow != localStorage
  * - hasUncommittedChanges: edits != workflow
  * - revertChanges: reset edits where edits != workflow
@@ -161,6 +162,17 @@ export function connectWorkflowManager(nodeId = null, inputKey = null) {
       if (!changes[id].inputs) return false
       if (!changes[id].inputs[key]) return false
       return changes[id].inputs[key] !== current[id].inputs[key]
+    },
+    hasAnyModifiedInput(id = null) {
+      id ||= nodeId
+      if (!id) throw new Error("must specify nodeID")
+
+      if (!changes) return false
+      if (!changes[id]) return false
+      if (!changes[id].inputs) return false
+      return Object.entries(changes[id].inputs).some(([key, _v]) => {
+        return !sameInputs(id, key)
+      })
     },
     /** \b changed since last known write */
     get hasUnsavedChanges() {

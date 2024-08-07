@@ -12,9 +12,11 @@
   import WorkflowContents from "./components/WorkflowContents.svelte"
   import WorkflowRunButton from "./components/WorkflowRunButton.svelte"
   import ApiConfigModal from "./components/ApiConfigModal.svelte"
+  import NavigationPermalinks from "./components/NavigationPermalinks.svelte"
 
   import { connectWorkflowManager } from "./stores/workflowManager.svelte"
   import { api, STATUS } from "./stores/apiConnectionManager.svelte"
+
   let apiStatus = $derived.by(() => {
     if (api.status === STATUS.CONNECTING) return "Connecting"
     if (api.status === STATUS.IDLE) return "Connected"
@@ -25,6 +27,7 @@
   let apiConfigModal = $state()
 
   const manager = connectWorkflowManager()
+  let nodeEntries = $derived(Object.entries(manager.current || {}))
 
   onMount(() => {
     if (api.autoconnect) api.connect()
@@ -63,145 +66,7 @@
   </header>
   <div class="flex-grow">
     <div>
-      <menu class="menu px-4 py-0">
-        <!-- only top-level is open at start -->
-        <li>
-          <details open>
-            <summary>FOO</summary>
-
-            <ul>
-              <li>
-                <details>
-                  <summary>todo: add permalinks to each node</summary>
-
-                  <ul>
-                    <li>
-                      <details>
-                        <summary>Inputs: (4)</summary>
-
-                        <ul>
-                          <li><a href="#">CLIP</a></li>
-                          <li><a href="#">VAE</a></li>
-                          <li><a href="#">Model</a></li>
-                        </ul>
-                      </details>
-                    </li>
-                    <li>
-                      <details>
-                        <summary>Outputs: (4)</summary>
-
-                        <ul>
-                          <li><a href="#">Image</a></li>
-                          <li><a href="#">Image</a></li>
-                          <li><a href="#">Image</a></li>
-                        </ul>
-                      </details>
-                    </li>
-                  </ul>
-                </details>
-              </li>
-              <li>
-                <details>
-                  <summary>todo: add permalinks to each node</summary>
-
-                  <ul>
-                    <li>
-                      <details>
-                        <summary>Inputs: (4)</summary>
-
-                        <ul>
-                          <li><a href="#">CLIP</a></li>
-                          <li><a href="#">VAE</a></li>
-                          <li><a href="#">Model</a></li>
-                        </ul>
-                      </details>
-                    </li>
-                    <li>
-                      <details>
-                        <summary>Outputs: (4)</summary>
-
-                        <ul>
-                          <li><a href="#">Image</a></li>
-                          <li><a href="#">Image</a></li>
-                          <li><a href="#">Image</a></li>
-                        </ul>
-                      </details>
-                    </li>
-                  </ul>
-                </details>
-              </li>
-            </ul>
-          </details>
-        </li>
-        <li>
-          <details open>
-            <summary>BAR</summary>
-
-            <ul>
-              <li>
-                <details>
-                  <summary>todo: add permalinks to each node</summary>
-
-                  <ul>
-                    <li>
-                      <details>
-                        <summary>Inputs: (4)</summary>
-
-                        <ul>
-                          <li><a href="#">CLIP</a></li>
-                          <li><a href="#">VAE</a></li>
-                          <li><a href="#">Model</a></li>
-                        </ul>
-                      </details>
-                    </li>
-                    <li>
-                      <details>
-                        <summary>Outputs: (4)</summary>
-
-                        <ul>
-                          <li><a href="#">Image</a></li>
-                          <li><a href="#">Image</a></li>
-                          <li><a href="#">Image</a></li>
-                        </ul>
-                      </details>
-                    </li>
-                  </ul>
-                </details>
-              </li>
-              <li>
-                <details>
-                  <summary>todo: add permalinks to each node</summary>
-
-                  <ul>
-                    <li>
-                      <details>
-                        <summary>Inputs: (4)</summary>
-
-                        <ul>
-                          <li><a href="#">CLIP</a></li>
-                          <li><a href="#">VAE</a></li>
-                          <li><a href="#">Model</a></li>
-                        </ul>
-                      </details>
-                    </li>
-                    <li>
-                      <details>
-                        <summary>Outputs: (4)</summary>
-
-                        <ul>
-                          <li><a href="#">Image</a></li>
-                          <li><a href="#">Image</a></li>
-                          <li><a href="#">Image</a></li>
-                        </ul>
-                      </details>
-                    </li>
-                  </ul>
-                </details>
-              </li>
-            </ul>
-          </details>
-        </li>
-      </menu>
+      <NavigationPermalinks nodeEntries={nodeEntries} />
     </div>
   </div>
   <footer class="footer text-xs grid-rows-2 gap-2 p-4 px-8">
@@ -259,7 +124,7 @@
   <main class="bg-base-100 drawer lg:drawer-open">
     <input id={DRAWER_ID} type="checkbox" class="drawer-toggle" />
 
-    <div class="drawer-side border-x border-l-0 z-10">
+    <div class="drawer-side border-base-200 border-x border-l-0 z-10">
       <label for={DRAWER_ID} class="drawer-overlay"></label>
       <aside class="flex flex-col bg-base-100 min-h-screen w-80">
         {@render sidebar()}

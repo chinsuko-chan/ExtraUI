@@ -45,8 +45,8 @@ const onMessage = (event) => {
   const payload = JSON.parse(event.data)
   if (ignorelist.includes(payload.type)) return
 
+  console.group("api.onMessage")
   console.log("<", { type: payload.type })
-  console.group("data")
   console.log(payload.data)
   console.groupEnd()
 

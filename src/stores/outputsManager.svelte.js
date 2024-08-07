@@ -7,13 +7,13 @@ import { cache } from "./imageCache.svelte"
 
 const manager = connectWorkflowManager()
 
-function flattenImageQueries(rawOutputs) {
+function flattenOutputs(outputsByNode) {
   // cba to work with deeply nested Promise.all rn
   const flattened = []
-  Object.entries(rawOutputs).forEach(([nodeId, outputs]) => {
-    Object.entries(outputs).forEach(([key, imagesArray]) => {
+  Object.entries(outputsByNode).forEach(([nodeId, outputs]) => {
+    Object.entries(outputs).forEach(([inputKey, imagesArray]) => {
       imagesArray.forEach((attributes) => {
-        flattened.push([nodeId, key, attributes])
+        flattened.push({ nodeId, inputKey, attributes })
       })
     })
   })
@@ -21,58 +21,60 @@ function flattenImageQueries(rawOutputs) {
   return flattened
 }
 
-async function pollImages(rawOutputs) {
+/** fetch single image from cache or API */
+async function fetchImage({ nodeId, inputKey, attributes }) {
+  const dbValues = [
+    manager.workflowName,
+    nodeId,
+    inputKey,
+    attributes.type,
+    attributes.filename,
+  ]
+
+  const key = dbValues.join(".")
+  const cachedResult = await cache.getImage(key)
+  if (cachedResult) {
+    return {
+      nodeId: cachedResult.nodeId,
+      inputKey,
+      filename: attributes.filename,
+      blob: URL.createObjectURL(cachedResult.blob),
+    }
+  }
+
+  // else, cache miss
+  const blob = await api.view(attributes)
+  const fullFlow = JSON.parse(JSON.stringify(manager.current)) // must dupe
+  const insertValues = {
+    key,
+    workflowName: manager.workflowName,
+    nodeId,
+    inputKey,
+    type: attributes.type,
+    filename: attributes.filename,
+    blob,
+    workflow: fullFlow,
+    workflowSearch: JSON.stringify(fullFlow),
+  }
+
+  await cache.saveImage({ ...insertValues })
+  return {
+    nodeId,
+    inputKey,
+    filename: attributes.filename,
+    blob: URL.createObjectURL(blob),
+  }
+}
+
+async function pollImages(outputsByNode) {
   const out = {}
-  const fmt = await Promise.all(
-    flattenImageQueries(rawOutputs).map(
-      async ([nodeId, nodeKey, attributes], nodeOutputIdx) => {
-        const dbValues = [
-          manager.workflowName,
-          nodeId,
-          nodeKey,
-          nodeOutputIdx,
-          attributes.type,
-          attributes.filename,
-        ]
+  const promises = flattenOutputs(outputsByNode).map(fetchImage)
+  const fmt = await Promise.all(promises)
 
-        const key = dbValues.join(".")
-        const cachedResult = await cache.getImage(key)
-        if (cachedResult) {
-          return [
-            cachedResult.nodeId,
-            nodeKey,
-            attributes.filename,
-            URL.createObjectURL(cachedResult.blob),
-          ]
-        }
-
-        // else, cache miss
-
-        const blob = await api.view(attributes)
-        const fullFlow = JSON.parse(JSON.stringify(manager.current)) // must dupe
-        const insertValues = {
-          key,
-          workflowName: manager.workflowName,
-          nodeId,
-          nodeKey,
-          nodeOutputIdx,
-          type: attributes.type,
-          filename: attributes.filename,
-          blob,
-          workflow: fullFlow,
-          workflowSearch: JSON.stringify(fullFlow),
-        }
-
-        await cache.saveImage({ ...insertValues })
-
-        return [nodeId, nodeKey, attributes.filename, URL.createObjectURL(blob)]
-      },
-    ),
-  )
-  fmt.forEach(([id, key, fname, blob]) => {
-    out[id] ||= {}
-    out[id][key] ||= []
-    out[id][key].push([fname, blob])
+  fmt.forEach(({ nodeId, inputKey, filename, blob }) => {
+    out[nodeId] ||= {}
+    out[nodeId][inputKey] ||= []
+    out[nodeId][inputKey].push([filename, blob])
   })
 
   mostRecentImages = out
@@ -89,19 +91,27 @@ function selectAndSaveOutput(promptId, outputs) {
 }
 
 let polling = -1
-let pollingDelay = 150
+let pollingDelay = 0
 let allOutputs = $state(JSON.parse(localStorage.getItem(OUTPUTS_KEY) || "{}"))
 let lastPromptId = $state(
   JSON.parse(localStorage.getItem(LAST_PROMPT_ID_KEY) || '""'),
 )
 
 let mostRecent = $derived(allOutputs[lastPromptId])
-
+let mostRecentFilenames = $derived.by(() => {
+  if (!mostRecent) return []
+  return flattenOutputs(mostRecent).map(({ attributes }) => {
+    return attributes.filename
+  })
+})
 let mostRecentImages = $state({})
 
 export const outputs = {
   get mostRecent() {
     return mostRecent || {}
+  },
+  get mostRecentFilenames() {
+    return mostRecentFilenames
   },
   get mostRecentImages() {
     return mostRecentImages || {}
@@ -113,15 +123,19 @@ export const outputs = {
 
     polling = setInterval(async () => {
       const info = await api.history(promptId)
+      // No api result yet
       if (!Object.keys(info).length) {
-        pollingDelay *= 2 // simple backoff 4 now
-        return // no result yet
+        // initial polling request should be instant
+        if (pollingDelay === 0) return (pollingDelay = 500)
+
+        // all subsequent attempts use backoff
+        return (pollingDelay *= 2)
       }
 
       // got results
       selectAndSaveOutput(promptId, info[promptId].outputs)
 
-      pollingDelay = 150 // reset
+      pollingDelay = 0 // reset
       clearInterval(polling)
     }, pollingDelay)
   },

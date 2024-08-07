@@ -4,7 +4,7 @@ const DB_VERSION = 1
 const initDb = () => {
   const request = indexedDB.open(KEY, DB_VERSION)
   request.onupgradeneeded = (e) => {
-    console.log("upgrade finished.")
+    console.trace("db upgraded")
     const database = e.target.result
 
     /**
@@ -23,7 +23,8 @@ const initDb = () => {
       unique: false,
     })
 
-    imageStore.transaction.oncomplete = (e) => console.log("done.", e)
+    imageStore.transaction.oncomplete = (e) =>
+      console.trace("db initialized", e)
   }
 
   return new Promise((resolve, _reject) => {
@@ -43,15 +44,16 @@ export const cache = {
     const imgRequest = txn.objectStore("images").get(key)
     return new Promise((resolve, reject) => {
       imgRequest.onsuccess = (e) => resolve(e.target.result)
-      imgRequest.onerror = () => reject({})
+      imgRequest.onerror = (e) => {
+        console.warn(`Failed to load image, key = "${key}"`)
+      }
     })
   },
   saveImage({
     key,
     workflowName,
     nodeId,
-    nodeKey,
-    nodeOutputIdx,
+    inputKey,
     type,
     filename,
     blob,
@@ -63,8 +65,7 @@ export const cache = {
       key,
       workflowName,
       nodeId,
-      nodeKey,
-      nodeOutputIdx,
+      inputKey,
       type,
       filename,
       blob,
@@ -75,7 +76,16 @@ export const cache = {
     return new Promise((resolve, reject) => {
       // result here is the key
       imgRequest.onsuccess = (e) => resolve(e.target.result)
-      imgRequest.onerror = () => reject(null)
+      imgRequest.onerror = (e) => {
+        reject(e.target.error)
+        // not using promise resulting value, so just log and move on
+        const reason = e.target.error?.message
+        if (reason !== "Key already exists in the object store") {
+          throw e.target.error
+        }
+
+        console.warn(`Skipping, image key already exists: "${key}"`)
+      }
     })
   },
 }

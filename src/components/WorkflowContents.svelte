@@ -1,4 +1,8 @@
 <script>
+  import { onMount, untrack } from "svelte"
+
+  // let { nodeEntries } = $props()
+
   import { connectWorkflowManager } from "../stores/workflowManager.svelte"
   import { runner } from "../stores/workflowRunnerManager.svelte"
   import { outputs } from "../stores/outputsManager.svelte"
@@ -8,12 +12,11 @@
   import InputContentEditor from "./InputContentEditor.svelte"
 
   const manager = connectWorkflowManager()
+  let nodeEntries = $derived(Object.entries(manager.current || {}))
 
   function formatTitle(nodeObject) {
     return nodeObject._meta?.title || nodeObject.class_type
   }
-
-  let nodeEntries = $derived(Object.entries(manager.current || {}))
 
   function toggleNode(nodeId) {
     expandedState.toggleNode(nodeId)
@@ -25,15 +28,32 @@
     expandedState.save()
   }
 
+  // hacky solution to auto-fetch latest images... it works tho
+  let previousImages = ""
+
   /** poll when most recent run changes */
   $effect(() => {
     if (runner?.lastRun?.prompt_id)
       return outputs.poll(runner.lastRun.prompt_id)
   })
 
+
   /** fetch images when output state changes */
   $effect(() => {
-    if (Object.keys(outputs.mostRecent).length) return outputs.pollImages(outputs.mostRecent)
+    if (!outputs.mostRecentFilenames.length) return
+
+
+    if (previousImages !== JSON.stringify(outputs.mostRecentFilenames)) {
+      outputs.pollImages(outputs.mostRecent)
+      previousImages = JSON.stringify(outputs.mostRecentFilenames)
+    }
+  })
+
+  /** focus node on first mount */
+  onMount(() => {
+    if (!location.hash) return
+    const node = document.querySelector(location.hash)
+    if (node) return node.scrollIntoView()
   })
 </script>
 
