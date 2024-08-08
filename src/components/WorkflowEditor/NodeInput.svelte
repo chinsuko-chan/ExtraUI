@@ -1,5 +1,5 @@
 <script>
-  let { id, key, originalValue = null } = $props()
+  let { id, key, originalValue } = $props()
 
   import NodeInputEditor from "./NodeInputEditor.svelte"
 
@@ -26,7 +26,7 @@
   class:rounded-md={view.isExpandedInput}
 >
   <div
-    class="collapse min-h-4 relative"
+    class="collapse min-h-4 relative pt-0"
     class:collapse-arrow={view.isExpandedInput}
   >
     <input

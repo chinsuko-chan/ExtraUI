@@ -100,6 +100,11 @@ function removeBlankOrEqualChanges(original, edits) {
   return newChanges
 }
 
+export function getNode(id) {
+  if (!currentWorkflow) return
+  return currentWorkflow[id]
+}
+
 /**
  * edits API:
  * - isModifiedInput: specified edit input != workflow input
