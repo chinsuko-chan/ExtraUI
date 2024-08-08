@@ -118,26 +118,26 @@
   </nav>
 {/snippet}
 
-<div class="container mx-auto">
-  <main class="bg-base-100 drawer lg:drawer-open">
-    <input id={DRAWER_ID} type="checkbox" class="drawer-toggle" />
+<main class="bg-base-100 drawer lg:drawer-open">
+  <input id={DRAWER_ID} type="checkbox" class="drawer-toggle" />
 
-    <div class="drawer-side border-base-200 border-x border-l-0 z-10">
-      <label for={DRAWER_ID} class="drawer-overlay"></label>
-      <aside class="flex flex-col bg-base-100 min-h-screen w-80">
-        {@render sidebar()}
-      </aside>
-    </div>
+  <div class="drawer-side border-base-200 border-x border-l-0 z-10">
+    <label for={DRAWER_ID} class="drawer-overlay"></label>
+    <aside class="flex flex-col bg-base-100 min-h-screen w-80">
+      {@render sidebar()}
+    </aside>
+  </div>
 
-    <div class="drawer-content">
-      {@render navbar()}
-      <!-- tabs will go here -->
-      <hr class="my-5 opacity-0">
+  <div class="drawer-content">
+    {@render navbar()}
+    <!-- tabs will go here -->
+    <hr class="my-5 opacity-0">
+    <div class="max-w-screen-sm mx-auto">
       <WorkflowEditor nodeEntries={nodeEntries} />
     </div>
-  </main>
-  <ApiConfigModal bind:apiConfigModal={apiConfigModal} />
-</div>
+  </div>
+</main>
+<ApiConfigModal bind:apiConfigModal={apiConfigModal} />
 
 <style>
   .drawer-side {

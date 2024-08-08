@@ -45,8 +45,6 @@
     })
   })
 
-  let expandedGraphOutputs = $derived(Object.entries(view.expandedGraphOutputs))
-
   /**
    * @shape [targetNodeId: string, inputKey: string][]
    * @example [[ "9", "images" ]] <- Node 9 is the target, the graph input label is "images"
@@ -60,6 +58,12 @@
     return out
   }, [])
 
+  let expandedGraphOutputs = $derived.by(() => {
+      return graphOutputs.filter(([targetId, _targetInputLabel]) => {
+        return view.expandedGraphOutputs[targetId]
+      })
+    })
+
   onMount(() => {
     if (!location.hash) return
     const node = document.querySelector(location.hash)
@@ -68,36 +72,34 @@
   })
 </script>
 
-{#snippet leadingHr()}
-  {#if index !== 0}
-    <hr />
-  {/if}
-{/snippet}
-
 {#snippet trailingHr()}
   {#if index !== finalIndex}
-    <hr />
+    <hr class="w-1 min-h-2 flex-grow mx-auto border-base-300 bg-base-300 rounded-lg" />
   {/if}
 {/snippet}
 
-<li>
-  {@render leadingHr()}
-  <div class="timeline-middle">
-    <button
-      class="btn btn-xs btn-circle"
-      class:btn-outline={expanded}
-      class:btn-primary={outputs}
-      onclick={toggleNode}>
-      {id}
-    </button>
+{#snippet expansionControls()}
+  <div class="self-stretch">
+    <div class="h-full flex flex-col">
+      <button
+        class="btn btn-xs btn-circle my-1"
+        class:btn-outline={expanded}
+        class:btn-primary={outputs}
+        onclick={toggleNode}>
+        {id}
+      </button>
+      {@render trailingHr()}
+    </div>
   </div>
+{/snippet}
+
+<li class="flex gap-8">
+  {@render expansionControls()}
   <div
-    class="timeline-end border px-4 py-2"
-    class:mb-0={!expanded}
-    class:pb-0={!expanded}
-    class:border-transparent={!expanded}
+    class:mt-1={!expanded}
+    class:mb-2={expanded}
     class:timeline-box={expanded}
-    class:w-full={expanded}
+    class:flex-grow={expanded}
   >
     <section>
       <h2 id={`node-${id}`} class:mb-2={expanded}>
@@ -165,7 +167,7 @@
                         </tr>
                       </thead>
                       <tbody>
-                        {#each graphOutputs as [targetId, targetInputLabel]}
+                        {#each expandedGraphOutputs as [targetId, targetInputLabel]}
                         <NodeConnection
                           {id}
                           key={targetInputLabel}
@@ -215,8 +217,8 @@
       {/if}
     </section>
   </div>
-  {@render trailingHr()}
 </li>
+
 
 <style lang="postcss">
   h2 {

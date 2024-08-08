@@ -28,8 +28,8 @@
   })
 </script>
 
-<article class="mx-6 mb-16 xl:mr-2">
-  <ul class="timeline timeline-vertical timeline-snap-icon timeline-compact">
+<article class="mb-16">
+  <ul>
     {#each nodeEntries as [id, node], index}
       <Node
         {id}
