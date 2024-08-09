@@ -87,15 +87,34 @@ async function pollImages(outputsByNode) {
 }
 
 function selectAndSaveOutput(promptId, outputs) {
-  //0. init
-  allOutputs[manager.workflowName] ||= {}
-  allOutputs[manager.workflowName][promptId] ||= []
+  /**
+   * @gotcha some nodes produce empty objects as their "output"
+   *         ...which messes up like 2 edge cases i cba to document rn
+   *         skip these nodes entirely
+   */
+  const filteredOutputs = Object.entries(outputs).reduce(
+    (finalOut, [nodeId, nodeOutputs]) => {
+      const isEmpty = Object.entries(nodeOutputs).every(
+        ([_key, arrayOfOutputs]) => {
+          return arrayOfOutputs.length === 0
+        },
+      )
+      if (!isEmpty) {
+        finalOut[nodeId] = nodeOutputs
+      }
+      return finalOut
+    },
+    {},
+  )
 
-  // 1. add new value to stack
-  allOutputs[manager.workflowName][promptId].unshift(outputs)
+  // 1. init
+  allOutputs[manager.workflowName] ||= []
+
+  // 2. add new value to stack
+  allOutputs[manager.workflowName].unshift([promptId, filteredOutputs])
   lastPromptId = promptId
 
-  // 2. save to localStorage
+  // 3. save to localStorage
   localStorage.setItem(OUTPUTS_KEY, JSON.stringify(allOutputs))
   localStorage.setItem(LAST_PROMPT_ID_KEY, JSON.stringify(promptId))
 }
@@ -105,8 +124,8 @@ let pollingDelay = 0
 
 let mostRecent = $derived.by(() => {
   if (!allOutputs[manager.workflowName]) return
-  if (!allOutputs[manager.workflowName][lastPromptId]) return
-  return allOutputs[manager.workflowName][lastPromptId][0]
+  if (!allOutputs[manager.workflowName].length) return
+  return allOutputs[manager.workflowName][0][1]
 })
 let mostRecentFilenames = $derived.by(() => {
   if (!mostRecent) return []
@@ -132,23 +151,28 @@ export const outputs = {
   poll(promptId) {
     if (
       allOutputs[manager.workflowName] &&
-      allOutputs[manager.workflowName][promptId]
+      allOutputs[manager.workflowName].find(([pId]) => pId === promptId)
     ) {
       return (lastPromptId = promptId)
     }
-    let justPolled = false
+    let canPoll = true
 
     polling = setInterval(async () => {
-      if (justPolled) return
-      justPolled = true
+      if (!canPoll) return
+      canPoll = false
       const info = await api.history(promptId)
       // No api result yet
       if (!Object.keys(info).length) {
-        // initial polling request should be instant
-        if (pollingDelay === 0) return (pollingDelay = 500)
+        if (pollingDelay === 0) {
+          // english: second attempt
+          pollingDelay = 750
+        } else {
+          // english: third attempt onward
+          pollingDelay = Math.round(pollingDelay * 1.5)
+        }
 
-        // all subsequent attempts use backoff
-        return (pollingDelay *= 2)
+        return setTimeout(() => (canPoll = true), pollingDelay)
+        canPoll = true
       }
 
       // got results

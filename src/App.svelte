@@ -11,6 +11,7 @@
 
   import WorkflowSelector from "./components/WorkflowSelector.svelte"
   import WorkflowUploadButton from "./components/WorkflowUploadButton.svelte"
+  import WorkflowOutputs from "./components/WorkflowOutputs"
   import WorkflowEditor from "./components/WorkflowEditor"
   import WorkflowRunButton from "./components/WorkflowRunButton.svelte"
   import ApiConfigModal from "./components/ApiConfigModal.svelte"
@@ -165,13 +166,13 @@
         bind:group={openTab}
       />
     </div>
-    {#if openTab === "Edit"}
-      <div role="tabpanel" class="max-w-screen-sm mx-4 mr-6 md:mx-auto">
+    <div role="tabpanel" class="max-w-screen-sm mx-4 mr-6 md:mx-auto">
+      {#if openTab === "Edit"}
         <WorkflowEditor nodeEntries={nodeEntries} />
-      </div>
-    {:else if openTab === "Images"}
-      <div role="tabpanel" class="p-10"><span>todo :)</span></div>
-    {/if}
+      {:else if openTab === "Images"}
+        <WorkflowOutputs />
+      {/if}
+    </div>
   </div>
 </main>
 <ApiConfigModal bind:apiConfigModal={apiConfigModal} />

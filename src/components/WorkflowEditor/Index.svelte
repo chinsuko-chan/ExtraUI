@@ -13,8 +13,9 @@
 
   /** poll when most recent run changes */
   $effect(() => {
-    if (runner?.lastRun?.prompt_id)
+    if (runner?.lastRun?.prompt_id) {
       return outputs.poll(runner.lastRun.prompt_id)
+    }
   })
 
   /** fetch images when output state changes */
