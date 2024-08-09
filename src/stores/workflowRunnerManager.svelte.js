@@ -17,7 +17,7 @@ export const runner = {
   async run() {
     if (!api.isIdle) return console.warn("Skipping execution, not idle.")
     /** @note not compatible with i2i workflows yet */
-    const queueResult = await api.prompt(workflow.current)
+    const queueResult = await api.prompt(workflow.currentWorkflow)
     if (!queueResult.prompt_id) return {}
 
     return queueResult
