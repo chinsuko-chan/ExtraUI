@@ -3,6 +3,8 @@
 
   /** sidebar is visible at all times >lg */
   const DRAWER_ID = "drawer"
+  const TABS_KEY = "goodUI.stores.app.expandedTab"
+
   import menuSvg from "./assets/amburg.svg?raw"
   import ghLogoSvg from "./assets/gh-logo.svg?raw"
   import twtSvg from "./assets/twiddr.svg?raw"
@@ -16,6 +18,11 @@
 
   import { connectWorkflowManager } from "./stores/workflowManager.svelte"
   import { api, STATUS } from "./stores/apiConnectionManager.svelte"
+
+  let openTab = $state(localStorage.getItem(TABS_KEY) || "Edit")
+  $effect(() => {
+    localStorage.setItem(TABS_KEY, openTab)
+  })
 
   let apiStatus = $derived.by(() => {
     if (api.status === STATUS.CONNECTING) return "Connecting"
@@ -130,11 +137,41 @@
 
   <div class="drawer-content">
     {@render navbar()}
-    <!-- tabs will go here -->
-    <hr class="my-5 opacity-0">
-    <div class="max-w-screen-sm mx-4 mr-6 md:mx-auto">
-      <WorkflowEditor nodeEntries={nodeEntries} />
+    <div role="tablist" class="inline-grid grid-cols-2 w-full mb-8">
+      <input
+        type="radio"
+        name="activeTab"
+        role="tab"
+        class="tab text-lg h-12"
+        style="border-color: unset"
+        class:border-t-2={openTab === "Edit"}
+        class:border-primary={openTab === "Edit"}
+        class:text-primary={openTab === "Edit"}
+        aria-label="Edit"
+        value="Edit"
+        bind:group={openTab}
+      />
+      <input
+        type="radio"
+        name="activeTab"
+        role="tab"
+        class="tab text-lg h-12"
+        style="border-color: unset"
+        class:border-t-2={openTab === "Images"}
+        class:border-primary={openTab === "Images"}
+        class:text-primary={openTab === "Images"}
+        aria-label="Images"
+        value="Images"
+        bind:group={openTab}
+      />
     </div>
+    {#if openTab === "Edit"}
+      <div role="tabpanel" class="max-w-screen-sm mx-4 mr-6 md:mx-auto">
+        <WorkflowEditor nodeEntries={nodeEntries} />
+      </div>
+    {:else if openTab === "Images"}
+      <div role="tabpanel" class="p-10"><span>todo :)</span></div>
+    {/if}
   </div>
 </main>
 <ApiConfigModal bind:apiConfigModal={apiConfigModal} />
