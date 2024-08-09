@@ -1,6 +1,11 @@
 const OUTPUTS_KEY = "goodUI.stores.outputsManager.outputs"
 const LAST_PROMPT_ID_KEY = "goodUI.stores.outputsManager.lastPromptId"
 
+let allOutputs = $state(JSON.parse(localStorage.getItem(OUTPUTS_KEY) || "{}"))
+let lastPromptId = $state(
+  JSON.parse(localStorage.getItem(LAST_PROMPT_ID_KEY) || '""'),
+)
+
 import { connectWorkflowManager } from "./workflowManager.svelte"
 import { api } from "./apiConnectionManager.svelte"
 import { cache } from "./imageCache.svelte"
@@ -34,17 +39,18 @@ async function fetchImage({ nodeId, inputKey, attributes }) {
   const key = dbValues.join(".")
   const cachedResult = await cache.getImage(key)
   if (cachedResult) {
+    /** @hack idk if this is dvelopment side effect but cba rn */
+    const malformedBlob = !cachedResult.blob?.size
     return {
       nodeId: cachedResult.nodeId,
       inputKey,
       filename: attributes.filename,
-      blob: URL.createObjectURL(cachedResult.blob),
+      blob: malformedBlob ? null : URL.createObjectURL(cachedResult.blob),
     }
   }
 
   // else, cache miss
   const blob = await api.view(attributes)
-  const fullFlow = JSON.parse(JSON.stringify(manager.currentWorkflow)) // must dupe
   const insertValues = {
     key,
     workflowName: manager.workflowName,
@@ -53,8 +59,8 @@ async function fetchImage({ nodeId, inputKey, attributes }) {
     type: attributes.type,
     filename: attributes.filename,
     blob,
-    workflow: fullFlow,
-    workflowSearch: JSON.stringify(fullFlow),
+    workflow: $state.snapshot(manager.currentWorkflow),
+    workflowSearch: JSON.stringify($state.snapshot(manager.currentWorkflow)),
   }
 
   await cache.saveImage({ ...insertValues })
@@ -81,8 +87,12 @@ async function pollImages(outputsByNode) {
 }
 
 function selectAndSaveOutput(promptId, outputs) {
-  // 1. set new values
-  allOutputs[promptId] = outputs
+  //0. init
+  allOutputs[manager.workflowName] ||= {}
+  allOutputs[manager.workflowName][promptId] ||= []
+
+  // 1. add new value to stack
+  allOutputs[manager.workflowName][promptId].unshift(outputs)
   lastPromptId = promptId
 
   // 2. save to localStorage
@@ -92,12 +102,12 @@ function selectAndSaveOutput(promptId, outputs) {
 
 let polling = -1
 let pollingDelay = 0
-let allOutputs = $state(JSON.parse(localStorage.getItem(OUTPUTS_KEY) || "{}"))
-let lastPromptId = $state(
-  JSON.parse(localStorage.getItem(LAST_PROMPT_ID_KEY) || '""'),
-)
 
-let mostRecent = $derived(allOutputs[lastPromptId])
+let mostRecent = $derived.by(() => {
+  if (!allOutputs[manager.workflowName]) return
+  if (!allOutputs[manager.workflowName][lastPromptId]) return
+  return allOutputs[manager.workflowName][lastPromptId][0]
+})
 let mostRecentFilenames = $derived.by(() => {
   if (!mostRecent) return []
   return flattenOutputs(mostRecent).map(({ attributes }) => {
@@ -107,6 +117,9 @@ let mostRecentFilenames = $derived.by(() => {
 let mostRecentImages = $state({})
 
 export const outputs = {
+  get history() {
+    return allOutputs[manager.workflowName] || []
+  },
   get mostRecent() {
     return mostRecent || {}
   },
@@ -117,11 +130,17 @@ export const outputs = {
     return mostRecentImages || {}
   },
   poll(promptId) {
-    if (allOutputs[promptId]) {
+    if (
+      allOutputs[manager.workflowName] &&
+      allOutputs[manager.workflowName][promptId]
+    ) {
       return (lastPromptId = promptId)
     }
+    let justPolled = false
 
     polling = setInterval(async () => {
+      if (justPolled) return
+      justPolled = true
       const info = await api.history(promptId)
       // No api result yet
       if (!Object.keys(info).length) {
