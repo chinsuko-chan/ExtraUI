@@ -27,7 +27,7 @@ function flattenOutputs(outputsByNode) {
 }
 
 /** fetch single image from cache or API */
-async function fetchImage({ nodeId, inputKey, attributes }) {
+export async function fetchImage({ nodeId, inputKey, attributes }) {
   const dbValues = [
     manager.workflowName,
     nodeId,
