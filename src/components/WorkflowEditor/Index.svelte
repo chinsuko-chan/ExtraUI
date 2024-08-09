@@ -28,7 +28,7 @@
   })
 </script>
 
-<article class="mb-16">
+<article>
   <ul>
     {#each nodeEntries as [id, node], index}
       <Node

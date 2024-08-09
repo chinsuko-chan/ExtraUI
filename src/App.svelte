@@ -67,10 +67,10 @@
   <div class="flex-grow">
     <NavigationPermalinks nodeEntries={nodeEntries} />
   </div>
-  <footer class="footer text-xs grid-rows-2 gap-2 p-4 px-8">
-    <a class="link btn btn-sm btn-ghost font-normal flex items-center gap-2" href="https://github.com/chinsuko-chan/goodUI" target="_blank" rel="noopener">
+  <footer class="footer text-xs grid-rows-2 gap-1 p-3 px-6">
+    <a class="link btn btn-sm btn-ghost font-normal flex items-center gap-2" href="https://github.com/chinsuko-chan/GoodUI" target="_blank" rel="noopener">
       <span>{@html ghLogoSvg}</span>
-      goodUI
+      GoodUI
     </a>
     <a class="link btn btn-sm btn-ghost font-normal flex items-center gap-2" href="https://x.com/chinsuko_chan" target="_blank" rel="noopener">
       <span>{@html twtSvg}</span>
@@ -132,7 +132,7 @@
     {@render navbar()}
     <!-- tabs will go here -->
     <hr class="my-5 opacity-0">
-    <div class="max-w-screen-sm mx-auto">
+    <div class="max-w-screen-sm mx-4 mr-6 md:mx-auto">
       <WorkflowEditor nodeEntries={nodeEntries} />
     </div>
   </div>

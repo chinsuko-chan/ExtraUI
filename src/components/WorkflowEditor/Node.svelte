@@ -93,7 +93,7 @@
   </div>
 {/snippet}
 
-<li class="flex gap-8">
+<li class="flex gap-8" class:mb-16={index === finalIndex}>
   {@render expansionControls()}
   <div
     class:mt-1={!expanded}
