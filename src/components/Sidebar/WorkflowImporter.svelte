@@ -1,7 +1,4 @@
 <script>
-  import { connectWorkflowManager } from "../stores/workflowManager.svelte"
-
-  const manager = connectWorkflowManager()
   let dropzoneFocused = false
 
   function ondragenter(e) {
@@ -22,7 +19,7 @@
 
   /** actual logic here */
   function handleFiles(files) {
-    const newWorkflows = JSON.parse(JSON.stringify(manager.allWorkflows))
+    const toImport = {}
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
       if (!file.type.startsWith("application/json")) continue
@@ -30,19 +27,13 @@
       const reader = new FileReader()
       reader.onload = (e) => {
         const key = file.name.replace(/\.json$/i, "")
-        if (manager.allWorkflows[key]) {
-          const yes = confirm(
-            `Workflow named "${key}" already exists, overwrite?`,
-          )
-          if (!yes) return
-        }
 
-        newWorkflows[key] = JSON.parse(e.target.result)
-        manager.allWorkflows = newWorkflows
-        manager.save()
+        toImport[key] = JSON.parse(e.target.result)
       }
       reader.readAsText(file)
     }
+
+    console.log("will import the following:", toImport)
   }
 
   function ondrop(e) {
@@ -84,6 +75,6 @@
       class="hidden"
       {onchange}
     />
-    <span>Import Workflow</span>
+    <span>Add Workflow</span>
   </label>
 </span>
