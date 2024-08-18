@@ -11,6 +11,8 @@
     graphOutputs,
   } = $props()
 
+  import NodeInput from "./NodeInput.svelte"
+
   function formatTitle(nodeObj) {
     return nodeObj._meta?.title || nodeObj.class_type
   }
@@ -60,16 +62,16 @@
 
 {#snippet expandedInfo()}
   <div class="flex justify-between">
-    <div>
+    <ul>
       {#each inputs as _input}
         <span>input!</span>
       {/each}
-    </div>
-    <div>
+    </ul>
+    <ul>
       {#each outputs as _outputs}
         <span>output!</span>
       {/each}
-    </div>
+    </ul>
   </div>
 {/snippet}
 
@@ -90,7 +92,7 @@
             >#</span
           >
         </a>
-        {formatTitle(node)}
+        {title}
       </h2>
 
       {#if expanded}
@@ -111,9 +113,8 @@
             {#if inputs.length}
               <h3 class="font-bold mb-2">Inputs</h3>
               <ul class="flex flex-wrap">
-                {#each inputs as input}
-                  <!-- <NodeInput id={input.id} key={input.key} originalValue={input.value} /> -->
-                  <span>todo !</span>
+                {#each inputs as { key, value }}
+                  <NodeInput {id} {key} {value} />
                 {/each}
               </ul>
             {/if}
