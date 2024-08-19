@@ -4,7 +4,7 @@
   import Node from "./Node.svelte"
 
   import { connectWorkflow } from "stores/workflows.svelte"
-  const workflowStore = connectWorkflow(selectedWorkflowName)
+  let workflowStore = $derived(connectWorkflow(selectedWorkflowName))
 
   let nodes = $derived(workflowStore.current?.nodes || [])
 </script>

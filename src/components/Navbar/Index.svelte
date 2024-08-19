@@ -6,7 +6,7 @@
   } = $props()
 
   import { connectWorkflow } from "stores/workflows.svelte"
-  const workflowStore = connectWorkflow(selectedWorkflowName)
+  let workflowStore = $derived(connectWorkflow(selectedWorkflowName))
 
   import menuSvg from "assets/amburg.svg?raw"
 
