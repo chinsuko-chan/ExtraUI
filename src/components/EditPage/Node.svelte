@@ -34,6 +34,9 @@
       delete newState[workflowName][id]
       delete viewState[workflowName][id]
     } else {
+      newState[workflowName] ||= {}
+      viewState[workflowName] ||= {}
+
       newState[workflowName][id] = 1
       viewState[workflowName][id] = 1
     }

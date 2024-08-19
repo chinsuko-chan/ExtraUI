@@ -1,5 +1,12 @@
 <script>
-  let { drawerId = "workflowDrawer" } = $props()
+  let {
+    selectedWorkflowName,
+    selectedTab,
+    drawerId = "workflowDrawer",
+  } = $props()
+
+  import { connectWorkflow } from "stores/workflows.svelte"
+  const workflowStore = connectWorkflow(selectedWorkflowName)
 
   import menuSvg from "assets/amburg.svg?raw"
 
@@ -31,14 +38,45 @@
 
   <div class="navbar-center">
     <ul class="menu menu-horizontal bg-base-200 rounded-box">
-      <li><button>{@html editSvg}</button></li>
-      <li><button>{@html viewSvg}</button></li>
-      <li><button>{@html workflowSvg}</button></li>
+      <li>
+        <button
+          class="hover:text-base-content"
+          class:bg-primary={selectedTab === "edit"}
+          class:text-primary-content={selectedTab === "edit"}
+          >{@html editSvg}</button
+        >
+      </li>
+      <li>
+        <button
+          class="hover:text-base-content"
+          class:bg-primary={selectedTab === "view"}
+          class:text-primary-content={selectedTab === "view"}
+          >{@html viewSvg}</button
+        >
+      </li>
+      <li>
+        <button
+          class="hover:text-base-content"
+          class:bg-primary={selectedTab === "workflow"}
+          class:text-primary-content={selectedTab === "workflow"}
+          >{@html workflowSvg}</button
+        >
+      </li>
     </ul>
   </div>
 
-  <div class="navbar-end flex-grow gap-2">
-    <button class="btn btn-sm btn-warning">Save</button>
-    <button class="btn btn-sm btn-outline btn-error">Revert</button>
-  </div>
+  {#if workflowStore.current}
+    {#if workflowStore.hasChanges}
+      <div class="navbar-end flex-grow gap-2">
+        <button
+          class="btn btn-sm btn-warning"
+          onclick={workflowStore.keepChanges}>Save</button
+        >
+        <button
+          class="btn btn-sm btn-outline btn-error"
+          onclick={workflowStore.revertChanges}>Revert</button
+        >
+      </div>
+    {/if}
+  {/if}
 </nav>

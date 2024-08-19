@@ -138,6 +138,27 @@ export function connectWorkflow(workflowName) {
     get hasChanges() {
       return workflowHasChanges(workflowName)
     },
+    keepChanges() {
+      const newWorkflowState = JSON.parse(JSON.stringify(allWorkflows))
+      newWorkflowState[workflowName] ||= {}
+
+      Object.entries(allChanges[workflowName]).forEach(([nodeId, node]) => {
+        // tl;dr only care about inputs (for now...)
+        Object.entries(node.inputs).forEach(([inputKey, value]) => {
+          newWorkflowState[workflowName][nodeId].inputs[inputKey] = value
+        })
+      })
+
+      allWorkflows[workflowName] = newWorkflowState[workflowName]
+      allChanges[workflowName] = {}
+
+      localWorkflows.save(allWorkflows)
+      localChanges.save(allChanges)
+    },
+    revertChanges() {
+      allChanges[workflowName] = {}
+      localChanges.save(allChanges)
+    },
   }
 }
 
