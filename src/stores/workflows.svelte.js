@@ -60,6 +60,10 @@ let workflows = $derived.by(() => {
   return Object.entries(allWorkflows).reduce(reduceWorkflows, [])
 })
 
+let changes = $derived.by(() => {
+  return Object.entries(allChanges).reduce(reduceWorkflows, [])
+})
+
 export default {
   get workflows() {
     return workflows
@@ -77,16 +81,19 @@ export default {
 
 // util
 
-export function getWorkflow(workflowName) {
-  return workflows.find(({ name }) => name === workflowName)
+export function getWorkflow(workflowName, source = null) {
+  source ||= workflows
+  return source.find(({ name }) => name === workflowName)
 }
 
-export function getNode(workflowName, nodeId) {
-  return getWorkflow(workflowName)?.nodes?.find(({ id }) => id === nodeId)
+export function getNode(workflowName, nodeId, source = null) {
+  return getWorkflow(workflowName, source)?.nodes?.find(
+    ({ id }) => id === nodeId,
+  )
 }
 
-export function getInput(workflowName, nodeId, inputKey) {
-  const node = getNode(workflowName, nodeId)
+export function getInput(workflowName, nodeId, inputKey, source = null) {
+  const node = getNode(workflowName, nodeId, source)
   if (!node) return undefined
   return (
     node.inputs.find(({ key }) => key === inputKey) ||
@@ -131,10 +138,6 @@ export function connectWorkflow(workflowName) {
     get hasChanges() {
       return workflowHasChanges(workflowName)
     },
-    save() {
-      // todo: need change shape back to localStore expected
-      console.log("^^")
-    },
   }
 }
 
@@ -152,12 +155,18 @@ export function connectNode(workflowName, nodeId) {
 export function connectInput(workflowName, nodeId, inputKey) {
   return {
     get value() {
-      return getInput(workflowName, nodeId, inputKey)?.value
+      return (
+        getInput(workflowName, nodeId, inputKey, changes)?.value ||
+        getInput(workflowName, nodeId, inputKey)?.value
+      )
     },
     set value(newValue) {
       allChanges[workflowName] ||= {}
       allChanges[workflowName][nodeId] ||= { inputs: {} }
       allChanges[workflowName][nodeId].inputs[inputKey] = newValue
+    },
+    get isChanged() {
+      return inputHasChanges(workflowName, nodeId, inputKey)
     },
   }
 }

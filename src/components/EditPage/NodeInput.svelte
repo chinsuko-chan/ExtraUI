@@ -1,9 +1,15 @@
 <script>
   let { workflowName, id, key, value } = $props()
 
+  // const KEY = "goodUI.components.editPage.nodeInput.expandedState"
+  // import connect from "lib/localStore"
+  // const localViewState = connect(KEY, {})
+  // let viewState = $state(localViewState.current)
+  import { connectInput } from "stores/workflows.svelte"
+  const inputStore = connectInput(workflowName, id, key)
+
   import NodeInputEditor from "./NodeInputEditor.svelte"
 
-  let isModified = $state(false)
   let isExpanded = $state(false)
 
   function toggle() {
@@ -15,7 +21,7 @@
   class:w-full={isExpanded}
   class:mb-4={isExpanded}
   class:border={isExpanded}
-  class:border-secondary={isExpanded && isModified}
+  class:border-secondary={isExpanded && inputStore.isChanged}
   class:shadow-md={isExpanded}
   class:rounded-md={isExpanded}
 >
@@ -32,11 +38,11 @@
       class:mb-4={isExpanded}
     >
       <code
-        class={isModified ? null : "dark:border-neutral-content"}
+        class={inputStore.isChanged ? null : "dark:border-neutral-content"}
         class:btn={!isExpanded}
         class:btn-xs={!isExpanded}
-        class:btn-outline={isModified}
-        class:btn-secondary={isModified}>{key}</code
+        class:btn-outline={inputStore.isChanged}
+        class:btn-secondary={inputStore.isChanged}>{key}</code
       >
     </div>
     {#if isExpanded}
