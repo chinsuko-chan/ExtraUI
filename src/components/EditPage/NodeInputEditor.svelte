@@ -1,30 +1,33 @@
 <script>
-  // let { id, key, value } = $props()
-  let { value } = $props()
+  import { connectInput } from "stores/workflows.svelte"
+  let { workflowName, id, key, value } = $props()
 
-  let editValue = $state(value)
-
-  let edited = $derived(editValue !== value)
+  const inputStore = connectInput(workflowName, id, key)
 </script>
 
 {#if typeof value === "number"}
   <label class="form-control flex-row items-start gap-2">
-    <span class="badge badge-info" class:badge-outline={!edited}> Number </span>
+    <span class="badge badge-info" class:badge-outline={!inputStore.hasChanges}>
+      Number
+    </span>
     <input
       type="number"
       class="input input-bordered input-sm max-w-xs"
-      bind:value={editValue}
+      bind:value={inputStore.value}
       placeholder={value}
     />
   </label>
 {:else if typeof value === "string"}
   <label class="form-control flex-row items-start gap-2">
-    <span class="badge badge-success" class:badge-outline={!edited}>
+    <span
+      class="badge badge-success"
+      class:badge-outline={!inputStore.hasChanges}
+    >
       String
     </span>
     <textarea
       class="textarea textarea-bordered w-full"
-      bind:value={editValue}
+      bind:value={inputStore.value}
       placeholder={value}
     ></textarea>
   </label>

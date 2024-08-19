@@ -1,4 +1,6 @@
 <script>
+  import workflowStore from "stores/workflows.svelte"
+
   let dropzoneFocused = false
 
   function ondragenter(e) {
@@ -19,7 +21,6 @@
 
   /** actual logic here */
   function handleFiles(files) {
-    const toImport = {}
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
       if (!file.type.startsWith("application/json")) continue
@@ -28,12 +29,11 @@
       reader.onload = (e) => {
         const key = file.name.replace(/\.json$/i, "")
 
-        toImport[key] = JSON.parse(e.target.result)
+        workflowStore.setWorkflowByName(key, JSON.parse(e.target.result))
+        workflowStore.save()
       }
       reader.readAsText(file)
     }
-
-    console.log("will import the following:", toImport)
   }
 
   function ondrop(e) {

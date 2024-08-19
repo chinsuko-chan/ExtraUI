@@ -1,4 +1,6 @@
 <script>
+  import workflowStore from "stores/workflows.svelte"
+
   let { drawerId = "workflowDrawer" } = $props()
 
   import ghLogoSvg from "assets/gh-logo.svg?raw"
@@ -21,8 +23,8 @@
 
     <div class="flex-grow m-4">
       <menu class="menu px-3 gap-1 border border-transparent">
-        {#each [1,2,3] as _flow}
-          <WorkflowSection />
+        {#each workflowStore.workflows as { name, nodes }}
+          <WorkflowSection {name} {nodes} />
         {/each}
         <li class="my-8">
           <WorkflowImporter />

@@ -1,9 +1,7 @@
 <script>
-  let { id, key, value } = $props()
+  let { workflowName, id, key, value } = $props()
 
   import NodeInputEditor from "./NodeInputEditor.svelte"
-
-  $inspect(id, key, value)
 
   let isModified = $state(false)
   let isExpanded = $state(false)
@@ -43,7 +41,7 @@
     </div>
     {#if isExpanded}
       <div class="collapse-content">
-        <NodeInputEditor {id} {key} {value} />
+        <NodeInputEditor {workflowName} {id} {key} {value} />
       </div>
     {/if}
   </div>

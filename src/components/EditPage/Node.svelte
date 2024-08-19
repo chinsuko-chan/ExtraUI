@@ -1,15 +1,26 @@
 <script>
+  const KEY = "goodUI.components.editPage.node.expandedState"
+  import connect from "lib/localStore"
+  const localViewState = connect(KEY, {})
+  let viewState = $state(localViewState.current)
+
   let {
+    workflowName,
     id,
     node,
     index,
     finalIndex,
-    expanded,
     inputs,
     graphInputs,
     outputs,
     graphOutputs,
   } = $props()
+
+
+  let expanded = $derived.by(() => {
+    if (!viewState[workflowName]) return false
+    return !!viewState[workflowName][id]
+  })
 
   import NodeInput from "./NodeInput.svelte"
 
@@ -20,7 +31,13 @@
   let title = $state(formatTitle(node))
 
   function toggleNode() {
-    console.log('toggle')
+    viewState[workflowName] ||= {}
+    if (viewState[workflowName][id]) {
+      delete viewState[workflowName][id]
+    } else {
+      viewState[workflowName][id] = 1
+    }
+    localViewState.save(viewState)
   }
 
   let inputsAndOutputsExpanded = $state(Math.random() > 0.5)
@@ -114,14 +131,14 @@
               <h3 class="font-bold mb-2">Inputs</h3>
               <ul class="flex flex-wrap">
                 {#each inputs as { key, value }}
-                  <NodeInput {id} {key} {value} />
+                  <NodeInput {workflowName} {id} {key} {value} />
                 {/each}
               </ul>
             {/if}
             {#if outputs.length}
               <h3 class="font-bold">Outputs</h3>
               <ul>
-                {#each outputs as output}
+                {#each outputs as _output}
                   <span>todo !</span>
                 {/each}
               </ul>
@@ -133,8 +150,8 @@
                 {#each graphOutputs as output}
                   {@render graphInputOutputAnchor(output, true)}
                 {/each}
-            </ul>
-          </div>
+              </ul>
+            </div>
           {/if}
         </div>
       {/if}

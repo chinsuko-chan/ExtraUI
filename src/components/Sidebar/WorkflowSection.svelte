@@ -1,11 +1,13 @@
 <script>
+  let { name, nodes } = $props()
+
   import NodePermalink from "./NodePermalink.svelte"
 </script>
 
 <li>
-  <h2 class="menu-title">sdxl example</h2>
+  <h2 class="menu-title">{name}</h2>
 </li>
 
-{#each [1, 2, 3] as _node}
-  <NodePermalink />
+{#each nodes as node}
+  <NodePermalink workflowName={name} id={node.id} {node} />
 {/each}

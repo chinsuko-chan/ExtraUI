@@ -1,84 +1,107 @@
 <script>
-  let expandedId = (() => {
-    if (!location.hash) return ""
+  let { workflowName, id, node } = $props()
 
-    return location.hash.replace(/^#node-/, "")
-  })()
+  /**
+   * auto open anchor if #node-{...} is in the URL
+   *
+   * btw, i lost so many fr*ckin' sanity points at this...
+   * <details> open attribute has 2 events: onclick and ontoggle
+   * - upon mount, if the `open` attribute is true, ontoggle is
+   *   ALWAYS triggered
+   *
+   * controlling open state via JS is a pain in the ass, cba rn
+   */
+  const locationId = location.hash.replace(/^#node-/, "")
+  const nodeOpen = locationId === id
+  const graphInputsOpen = locationId === id
+  const inputsOpen = locationId === id
+  const outputsOpen = locationId === id
+
+  import { connectNode, inputHasChanges } from "stores/workflows.svelte"
+  const nodeStore = connectNode(workflowName, id)
 
   function shouldDisplayBadge(value) {
     if (typeof value === "number") return true
     if (typeof value === "string") return true
-    if (Array.isArray(value)) return true
-    return false
+    if (Array.isArray(value)) return false // graph input/output
+    return true
   }
 
-  function displayText(value) {
+  function badgeText(inputOrOutput) {
+    const { value } = inputOrOutput
     if (typeof value === "number") return "Number"
     if (typeof value === "string") return "String"
     if (Array.isArray(value)) return "Node"
-    throw new Error(`value not supported: ${value}`)
+    return "?"
   }
+
+  let titleText = $derived.by(() => {
+    return `${id}. ${node._meta?.title || node.class_type}`
+  })
 </script>
 
 <li class="flex-grow-0 max-w-full">
-  <a href="#" class="absolute top-0 -left-4 flex opacity-50 hover:opacity-100">
-    <span class="text-base font-bold">#</span>
+  <a href={`#node-${id}`} class="absolute top-0 -left-4 flex opacity-50 hover:opacity-100">
+    <span class="text-base font-bold" class:text-primary={node.outputs.length}>#</span>
   </a>
 
-  <details class="max-w-full" open={expandedId === 0}>
-    <summary class="ml-8">
-      1. Crazy Ahh Title
-    </summary>
+  <details class="max-w-full" open={nodeOpen}>
+    <summary class="ml-8" class:text-secondary={nodeStore.hasChanges}>{titleText}</summary>
 
     <ul>
-      <li>{@render inputsList()}</li>
+      {#if node.graphInputs.length}
+        <li>
+          <details class="max-w-full" open={graphInputsOpen}>
+            {@render subsection("Graph Inputs", node.graphInputs)}
+          </details>
+        </li>
+      {/if}
 
-      {#if Math.random() > 0.5}
-        <li>{@render outputsList()}</li>
+      <li>
+        <details class="max-w-full" open={inputsOpen}>
+          {@render subsection("Inputs", node.inputs)}
+        </details>
+      </li>
+
+      {#if node.outputs.length}
+        <li>
+          <details class="max-w-full" open={outputsOpen}>
+            {@render subsection("Outputs", node.outputs)}
+          </details>
+        </li>
       {/if}
     </ul>
   </details>
 </li>
 
-{#snippet inputsList()}
-<details class="max-w-full" open={expandedId === 0}>
-    <summary>
-      <span>{"Inputs "}</span>
-      <span class="badge">99</span>
-    </summary>
+{#snippet subsection(title, elements)}
+  <summary
+    class:text-secondary={title === "Inputs" && nodeStore.hasChanges}
+    class:text-primary={title === "Outputs"}
+  >
+    <span>{title}</span>
+    <span class="badge">{elements.length}</span>
+  </summary>
 
-    <ul>
-      {#each [1, 2, 3, 4, 5, 6, 7, 8, 9] as num}
-        <li>
-          <div>
-            <code class="text-xs break-all">{num}</code>
+  <ul>
+    {#each elements as element}
+      <li>
+        <div>
+          <code class="text-xs break-all"
+            class:text-secondary={inputHasChanges(workflowName, id, element.key)}
+            class:text-primary={title === "Outputs"}
+          >{element.key}</code>
+          {#if shouldDisplayBadge(element.value)}
             <span
               class="badge badge-sm badge-outline"
-              class:badge-info={typeof num === "number"}
-              class:badge-success={typeof num === "string"}
+              class:badge-info={typeof element.value === "number"}
+              class:badge-success={typeof element.value === "string"}
             >
-              {displayText(num)}
+              {badgeText(element)}
             </span>
-          </div>
-        </li>
-      {/each}
-    </ul>
-  </details>
-{/snippet}
-
-{#snippet outputsList()}
-<details class="max-w-full" open={expandedId === 0}>
-    <summary class="text-primary">
-      {"Outputs "}
-      <span class="badge">2</span>
-    </summary>
-
-    <ul>
-      {#each [1, 2] as num}
-        <li>
-          <code class="text-primary text-xs break-all">{`xd ! ${num}`}</code>
-        </li>
-      {/each}
-    </ul>
-  </details>
+          {/if}
+        </div>
+      </li>
+    {/each}
+  </ul>
 {/snippet}
