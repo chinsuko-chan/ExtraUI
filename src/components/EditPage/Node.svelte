@@ -17,10 +17,7 @@
   } = $props()
 
 
-  let expanded = $derived.by(() => {
-    if (!viewState[workflowName]) return false
-    return !!viewState[workflowName][id]
-  })
+  let expanded = $derived(!!viewState[workflowName]?.[id])
 
   import NodeInput from "./NodeInput.svelte"
 
@@ -31,13 +28,17 @@
   let title = $state(formatTitle(node))
 
   function toggleNode() {
-    viewState[workflowName] ||= {}
-    if (viewState[workflowName][id]) {
+    const newState = JSON.parse(JSON.stringify(localViewState.current))
+
+    if (newState[workflowName]?.[id]) {
+      delete newState[workflowName][id]
       delete viewState[workflowName][id]
     } else {
+      newState[workflowName][id] = 1
       viewState[workflowName][id] = 1
     }
-    localViewState.save(viewState)
+
+    localViewState.save(newState)
   }
 
   let inputsAndOutputsExpanded = $state(Math.random() > 0.5)
