@@ -164,6 +164,7 @@ export function connectInput(workflowName, nodeId, inputKey) {
       allChanges[workflowName] ||= {}
       allChanges[workflowName][nodeId] ||= { inputs: {} }
       allChanges[workflowName][nodeId].inputs[inputKey] = newValue
+      localChanges.save(allChanges)
     },
     get isChanged() {
       return inputHasChanges(workflowName, nodeId, inputKey)

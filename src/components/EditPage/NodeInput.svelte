@@ -1,19 +1,33 @@
 <script>
   let { workflowName, id, key, value } = $props()
 
-  // const KEY = "goodUI.components.editPage.nodeInput.expandedState"
-  // import connect from "lib/localStore"
-  // const localViewState = connect(KEY, {})
-  // let viewState = $state(localViewState.current)
+  const KEY = "goodUI.components.editPage.nodeInput.expandedState"
+  import connect from "lib/localStore"
+  const localViewState = connect(KEY, {})
+  let viewState = $state(localViewState.current)
+
   import { connectInput } from "stores/workflows.svelte"
   const inputStore = connectInput(workflowName, id, key)
 
   import NodeInputEditor from "./NodeInputEditor.svelte"
 
-  let isExpanded = $state(false)
+  let isExpanded = $derived(!!viewState[workflowName]?.[id]?.[key])
 
   function toggle() {
-    isExpanded = !isExpanded
+    const newState = JSON.parse(JSON.stringify(localViewState.current))
+
+    if (newState[workflowName]?.[id]?.[key]) {
+      delete newState[workflowName][id][key]
+      delete viewState[workflowName][id][key]
+    } else {
+      newState[workflowName] ||= { [id]: {} }
+      viewState[workflowName] ||= { [id]: {} }
+
+      newState[workflowName][id][key] = 1
+      viewState[workflowName][id][key] = 1
+    }
+
+    localViewState.save(newState)
   }
 </script>
 
