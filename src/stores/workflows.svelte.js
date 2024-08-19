@@ -26,22 +26,29 @@ function reduceWorkflows(output, [workflowName, workflow]) {
       { graphInputs: [], inputs: [] },
     )
 
-    // 2. outputs (todo)
-    const outputs =
-      Math.random() > 0.5
-        ? []
-        : [
-            { key: "foo", value: "img" },
-            { key: "bar", value: "img" },
-          ]
+    // 2. outputs
+    const graphOutputs = Object.entries(workflow).reduce(
+      (gOutputs, [outId, node]) => {
+        Object.entries(node.inputs).forEach(([key, value]) => {
+          if (value[0] === nodeId) {
+            gOutputs.push({
+              key,
+              value: [outId, -999], // idk howto use 2nd ting yet
+            })
+          }
+        })
+        return gOutputs
+      },
+      [],
+    )
 
     nodes.push({
       ...node,
       id: nodeId,
       inputs,
       graphInputs,
-      graphOutputs: [],
-      outputs,
+      graphOutputs,
+      outputs: [],
     })
   })
 

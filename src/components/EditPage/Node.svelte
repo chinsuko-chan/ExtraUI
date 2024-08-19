@@ -66,11 +66,11 @@
       href={`#node-${value[0]}`}
       title={key}
       data-tip={key}
-      class="btn btn-circle btn-xs"
+      class="tooltip"
       class:tooltip-left={isOutput}
       class:tooltip-right={!isOutput}
     >
-      <span>
+      <span class="btn btn-circle btn-xs">
         {value[0]}
       </span>
     </a>
