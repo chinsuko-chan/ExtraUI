@@ -15,6 +15,11 @@
   import editSvg from "assets/pencil.svg?raw"
   import viewSvg from "assets/eye.svg?raw"
   import workflowSvg from "assets/branch.svg?raw"
+
+  function saveAndRun() {
+    workflowStore.keepChanges()
+    console.log("now i send to api ^w^")
+  }
 </script>
 
 <nav
@@ -27,10 +32,18 @@
   </div>
 
   <div class="navbar-start">
-    <button class="btn btn-sm btn-outline btn-success"> Run Workflow </button>
     <button
-      class="btn btn-ghost btn-circle border-0 ml-4"
-      title="Commit current changes and run the workflow."
+      class="btn btn-sm btn-outline btn-success"
+      disabled={workflowStore.hasChanges}
+    >
+      Run Workflow
+    </button>
+    <button
+      class="btn btn-sm btn-circle w-12 ml-4"
+      class:btn-ghost={!workflowStore.hasChanges}
+      class:btn-success={workflowStore.hasChanges}
+      title="Save current changes and run the workflow."
+      onclick={saveAndRun}
     >
       {@html runAndGoSvg}
     </button>
