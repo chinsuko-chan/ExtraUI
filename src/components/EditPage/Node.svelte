@@ -1,5 +1,5 @@
 <script>
-  const KEY = "goodUI.components.editPage.node.expandedState"
+  const KEY = "extraUI.components.editPage.node.expandedState"
   import connect from "lib/localStore"
   const localViewState = connect(KEY, {})
   let viewState = $state(localViewState.current)

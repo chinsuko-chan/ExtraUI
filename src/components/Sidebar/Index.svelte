@@ -41,7 +41,7 @@
     class="z-20 backdrop-blur-lg shadow-sm sticky top-0 p-4 gap-4"
   >
     <div class="flex justify-between items-center gap-2">
-      <h1 class="font-mono font-bold text-xl md:text-2xl">GoodUI</h1>
+      <h1 class="font-mono font-bold text-xl md:text-2xl">ExtraUI</h1>
       <button
         class="btn btn-xs btn-outline"
         class:btn-error={apiStatus === "Not connected"}
@@ -59,12 +59,12 @@
   <footer class="footer text-xs grid-rows-2 gap-1 p-3 px-6">
     <a
       class="link btn btn-sm btn-ghost font-normal flex items-center gap-2"
-      href="https://github.com/chinsuko-chan/GoodUI"
+      href="https://github.com/chinsuko-chan/ExtraUI"
       target="_blank"
       rel="noopener"
     >
       <span>{@html ghLogoSvg}</span>
-      GoodUI
+      ExtraUI
     </a>
     <a
       class="link btn btn-sm btn-ghost font-normal flex items-center gap-2"

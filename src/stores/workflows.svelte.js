@@ -1,7 +1,7 @@
 import connect from "lib/localStore"
 
-const WORKFLOWS_KEY = "goodUI.stores.workflow.allWorkflows"
-const CHANGES_KEY = "goodUI.stores.workflow.allChanges"
+const WORKFLOWS_KEY = "extraUI.stores.workflow.allWorkflows"
+const CHANGES_KEY = "extraUI.stores.workflow.allChanges"
 
 const localWorkflows = connect(WORKFLOWS_KEY, {})
 const localChanges = connect(CHANGES_KEY, {})

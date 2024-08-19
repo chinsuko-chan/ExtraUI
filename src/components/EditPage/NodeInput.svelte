@@ -1,7 +1,7 @@
 <script>
   let { workflowName, id, key, value } = $props()
 
-  const KEY = "goodUI.components.editPage.nodeInput.expandedState"
+  const KEY = "extraUI.components.editPage.nodeInput.expandedState"
   import connect from "lib/localStore"
   const localViewState = connect(KEY, {})
   let viewState = $state(localViewState.current)
