@@ -8,10 +8,7 @@
 
   import WorkflowSection from "./WorkflowSection.svelte"
   import WorkflowImporter from "./WorkflowImporter.svelte"
-
-  const statuses = ["Not connected", "Connecting", "Connected"]
-  let statusIndex = $state(0)
-  let apiStatus = $derived(statuses[statusIndex])
+  import SettingsModal from "./SettingsModal.svelte"
 </script>
 
 <input id={drawerId} type="checkbox" class="drawer-toggle" />
@@ -38,19 +35,11 @@
 
 {#snippet header()}
   <header
-    class="z-20 backdrop-blur-lg shadow-sm sticky top-0 p-4 gap-4"
+    class="z-20 backdrop-blur-lg shadow-sm sticky top-0 mx-4 gap-4"
   >
-    <div class="flex justify-between items-center gap-2">
+    <div class="flex justify-between items-center p-3 gap-2">
       <h1 class="font-mono font-bold text-xl md:text-2xl">ExtraUI</h1>
-      <button
-        class="btn btn-xs btn-outline"
-        class:btn-error={apiStatus === "Not connected"}
-        class:btn-warning={apiStatus === "Connecting"}
-        class:btn-success={apiStatus === "Connected"}
-        onclick={() => statusIndex + 1 >= 3 ? statusIndex = 0 : statusIndex += 1}
-      >
-        {apiStatus}
-      </button>
+      <SettingsModal />
     </div>
   </header>
 {/snippet}
