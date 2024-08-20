@@ -135,6 +135,9 @@ export function connectWorkflow(workflowName) {
     get current() {
       return getWorkflow(workflowName)
     },
+    get currentApi() {
+      return allWorkflows[workflowName]
+    },
     get hasChanges() {
       return workflowHasChanges(workflowName)
     },

@@ -90,88 +90,93 @@ function tryConnect() {
   connect()
 }
 
+export const api = {
+  get uri() {
+    return serverUri
+  },
+  set uri(newUri) {
+    serverUri = newUri
+    localServerUri.save(serverUri)
+  },
+  get status() {
+    return status
+  },
+  get isIdle() {
+    return status === STATUS.IDLE
+  },
+  get ignorelist() {
+    return ignorelist
+  },
+  set ignorelist(newValues) {
+    ignorelist = newValues
+    localIgnorelist.save(ignorelist)
+  },
+  get autoconnect() {
+    return autoconnect
+  },
+  set autoconnect(val) {
+    autoconnect = Boolean(val)
+    localAutoconnect.save(autoconnect)
+  },
+  connect: tryConnect,
+  disconnect() {
+    attemptingDisconnect = true
+    socket?.close()
+  },
+  /** POST payload to /prompt */
+  async prompt(workflowObject) {
+    if (status !== STATUS.IDLE)
+      return console.warn("Skipping execution, not idle.")
+
+    const request = new Request(`http://${serverUri}/prompt`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_id: CLIENT_ID,
+        prompt: workflowObject,
+      }),
+    })
+
+    status = STATUS.RUNNING
+    try {
+      const resp = await fetch(request)
+      return await resp.json()
+    } catch (e) {
+      console.error(e)
+      return {}
+    }
+  },
+  /** GET /history */
+  async history(promptId) {
+    const request = new Request(`http://${serverUri}/history/${promptId}`)
+    try {
+      const resp = await fetch(request)
+      return await resp.json()
+    } catch (e) {
+      console.error(e)
+      return {}
+    }
+  },
+  /** GET /view */
+  async view({ filename, type, subfolder = "" }) {
+    const params = { filename, type }
+    if (subfolder.length) params.subfolder = subfolder
+    const qs = new URLSearchParams(params)
+    const request = new Request(`http://${serverUri}/view?${qs}`)
+    try {
+      const resp = await fetch(request)
+      return await resp.blob()
+    } catch (e) {
+      console.error(e)
+      return {}
+    }
+  },
+}
+
 export default function connectApi() {
   if (autoconnect) tryConnect()
 
-  return {
-    get uri() {
-      return serverUri
-    },
-    set uri(newUri) {
-      serverUri = newUri
-      localServerUri.save(serverUri)
-    },
-    get status() {
-      return status
-    },
-    get ignorelist() {
-      return ignorelist
-    },
-    set ignorelist(newValues) {
-      ignorelist = newValues
-      localIgnorelist.save(ignorelist)
-    },
-    get autoconnect() {
-      return autoconnect
-    },
-    set autoconnect(val) {
-      autoconnect = Boolean(val)
-      localAutoconnect.save(autoconnect)
-    },
-    get isIdle() {
-      return status === STATUS.IDLE
-    },
-    connect: tryConnect,
-    disconnect() {
-      attemptingDisconnect = true
-      socket?.close()
-    },
-    /** POST payload to /prompt */
-    async prompt(workflowObject) {
-      const request = new Request(`http://${serverUri}/prompt`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          client_id: CLIENT_ID,
-          prompt: workflowObject,
-        }),
-      })
-
-      status = STATUS.RUNNING
-      try {
-        const resp = await fetch(request)
-        return await resp.json()
-      } catch (e) {
-        console.error(e)
-        return {}
-      }
-    },
-    /** GET /history */
-    async history(promptId) {
-      const request = new Request(`http://${serverUri}/history/${promptId}`)
-      try {
-        const resp = await fetch(request)
-        return await resp.json()
-      } catch (e) {
-        console.error(e)
-        return {}
-      }
-    },
-    /** GET /view */
-    async view({ filename, type, subfolder = "" }) {
-      const params = { filename, type }
-      if (subfolder.length) params.subfolder = subfolder
-      const qs = new URLSearchParams(params)
-      const request = new Request(`http://${serverUri}/view?${qs}`)
-      try {
-        const resp = await fetch(request)
-        return await resp.blob()
-      } catch (e) {
-        console.error(e)
-        return {}
-      }
-    },
-  }
+  return api
 }

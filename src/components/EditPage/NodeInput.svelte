@@ -20,8 +20,10 @@
       delete newState[workflowName][id][key]
       delete viewState[workflowName][id][key]
     } else {
-      newState[workflowName] ||= { [id]: {} }
-      viewState[workflowName] ||= { [id]: {} }
+      newState[workflowName] ||= {}
+      newState[workflowName][id] ||= {}
+      viewState[workflowName] ||= {}
+      viewState[workflowName][id] ||= {}
 
       newState[workflowName][id][key] = 1
       viewState[workflowName][id][key] = 1
