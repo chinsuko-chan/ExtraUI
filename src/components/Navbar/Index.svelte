@@ -1,8 +1,11 @@
 <script>
   let {
     selectedWorkflowName,
-    selectedTab,
+    selectedPage,
     drawerId = "workflowDrawer",
+    selectEditPage,
+    selectViewPage,
+    selectWorkflowPage,
   } = $props()
 
   import { api } from "stores/api.svelte"
@@ -90,25 +93,25 @@
       <li>
         <button
           class="hover:text-base-content"
-          class:bg-primary={selectedTab === "edit"}
-          class:text-primary-content={selectedTab === "edit"}
-          >{@html editSvg}</button
+          class:bg-primary={selectedPage === "edit"}
+          class:text-primary-content={selectedPage === "edit"}
+          onclick={selectEditPage}>{@html editSvg}</button
         >
       </li>
       <li>
         <button
           class="hover:text-base-content"
-          class:bg-primary={selectedTab === "view"}
-          class:text-primary-content={selectedTab === "view"}
-          >{@html viewSvg}</button
+          class:bg-primary={selectedPage === "view"}
+          class:text-primary-content={selectedPage === "view"}
+          onclick={selectViewPage}>{@html viewSvg}</button
         >
       </li>
       <li>
         <button
           class="hover:text-base-content"
-          class:bg-primary={selectedTab === "workflow"}
-          class:text-primary-content={selectedTab === "workflow"}
-          >{@html workflowSvg}</button
+          class:bg-primary={selectedPage === "workflow"}
+          class:text-primary-content={selectedPage === "workflow"}
+          onclick={selectWorkflowPage}>{@html workflowSvg}</button
         >
       </li>
     </ul>
