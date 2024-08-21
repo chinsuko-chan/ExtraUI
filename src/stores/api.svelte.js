@@ -173,6 +173,32 @@ export const api = {
       return {}
     }
   },
+  /** POST /upload/image */
+  async uploadImage({
+    image,
+    type = "input",
+    subfolder = "",
+    overwrite = false,
+  }) {
+    const formData = new FormData()
+    formData.append("image", image)
+    formData.append("type", type)
+    if (overwrite) formData.append("overwrite", overwrite)
+    if (subfolder) formData.append("subfolder", subfolder)
+
+    const request = new Request(`http://${serverUri}/upload/image`, {
+      method: "POST",
+      body: formData,
+    })
+
+    try {
+      const resp = await fetch(request)
+      return await resp.json()
+    } catch (e) {
+      console.error(e)
+      return {}
+    }
+  },
 }
 
 export default function connectApi() {
