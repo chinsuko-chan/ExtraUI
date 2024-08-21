@@ -22,6 +22,7 @@
 
   import NodeInput from "./NodeInput.svelte"
   import NodeOutput from "./NodeOutput.svelte"
+  import NodeGraphInfo from "./NodeGraphInfo.svelte"
 
   function formatTitle(nodeObj) {
     return nodeObj._meta?.title || nodeObj.class_type
@@ -46,7 +47,7 @@
     localViewState.save(newState)
   }
 
-  let inputsAndOutputsExpanded = $state(Math.random() > 0.5)
+  let inputsAndOutputsExpanded = $state(false)
 </script>
 
 {#snippet expansionButton()}
@@ -108,15 +109,26 @@
     class:flex-grow={expanded}
   >
     <section>
-      <h2 id={`node-${id}`} class:mb-2={expanded}>
-        <a aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
-          <span
-            class="mr-1 opacity-20 hover:opacity-60 text-base font-bold inline-block align-middle relative -mt-1"
-            >#</span
+      <header class="flex justify-between" class:mb-3={expanded}>
+        <h2 id={`node-${id}`}>
+          <a aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
+            <span
+              class="mr-1 opacity-20 hover:opacity-60 text-base font-bold inline-block align-middle relative -mt-1"
+              >#</span
+            >
+          </a>
+          {title}
+        </h2>
+
+        {#if expanded}
+          <button
+            class="btn btn-sm btn-ghost font-light opacity-50 hover:opacity-100"
+            onclick={() => inputsAndOutputsExpanded = !inputsAndOutputsExpanded}
           >
-        </a>
-        {title}
-      </h2>
+            {inputsAndOutputsExpanded ? "Collapse" : "Show Graph Info"}
+          </button>
+        {/if}
+      </header>
 
       {#if expanded}
         <div class="flex flex-nowrap gap-4">
@@ -131,7 +143,12 @@
           {/if}
           <div class="flex-grow">
             {#if inputsAndOutputsExpanded}
-              {@render expandedInfo()}
+              <NodeGraphInfo
+                {workflowName}
+                nodeTitle={title}
+                {graphInputs}
+                {graphOutputs}
+              />
             {/if}
             {#if inputs.length}
               <h3 class="font-bold mb-2">Inputs</h3>
