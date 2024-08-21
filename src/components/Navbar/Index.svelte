@@ -7,9 +7,9 @@
 
   import { api } from "stores/api.svelte"
   import { connectWorkflow } from "stores/workflows.svelte"
-  import { connect } from "stores/execution.svelte"
+  import { connectHistory } from "stores/execution.svelte"
   let workflowStore = $derived(connectWorkflow(selectedWorkflowName))
-  let runner = $derived(connect(selectedWorkflowName))
+  let runner = $derived(connectHistory(selectedWorkflowName))
 
   import menuSvg from "assets/amburg.svg?raw"
 

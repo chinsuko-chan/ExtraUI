@@ -3,6 +3,14 @@
 
   import Node from "./Node.svelte"
 
+  import { connectHistory } from "stores/execution.svelte"
+  // todo: move this to workflows store?
+  let executions = $derived(connectHistory(selectedWorkflowName))
+  let allResults = $derived(executions.results)
+  let mostRecentOutputs = $derived.by(() => {
+    return allResults[0]?.[1] || {}
+  })
+
   import { connectWorkflow } from "stores/workflows.svelte"
   let workflowStore = $derived(connectWorkflow(selectedWorkflowName))
 
@@ -21,7 +29,7 @@
         graphInputs={node.graphInputs}
         inputs={node.inputs}
         graphOutputs={node.graphOutputs}
-        outputs={node.outputs}
+        outputs={mostRecentOutputs[node.id] || []}
       />
     {/each}
   </ul>

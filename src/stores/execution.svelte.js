@@ -11,7 +11,7 @@ let executionHistory = $state(localExecutionHistory.current)
 let workflowHistory = $state(localWorkflowHistory.current) // should prob save the delta instead...
 let resultHistory = $state(localResultHistory.current)
 
-export function connect(workflowName) {
+export function connectHistory(workflowName) {
   return {
     get history() {
       return executionHistory[workflowName] || []

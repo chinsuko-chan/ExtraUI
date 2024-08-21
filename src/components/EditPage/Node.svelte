@@ -16,10 +16,12 @@
     graphOutputs,
   } = $props()
 
+  let outputsByKey = $derived(Object.entries(outputs))
 
   let expanded = $derived(!!viewState[workflowName]?.[id])
 
   import NodeInput from "./NodeInput.svelte"
+  import NodeOutput from "./NodeOutput.svelte"
 
   function formatTitle(nodeObj) {
     return nodeObj._meta?.title || nodeObj.class_type
@@ -53,7 +55,7 @@
       <button
         class="btn btn-xs btn-circle my-1"
         class:btn-outline={expanded}
-        class:btn-primary={outputs.length}
+        class:btn-primary={outputsByKey.length}
         onclick={toggleNode}>
         {id}
       </button>
@@ -139,11 +141,11 @@
                 {/each}
               </ul>
             {/if}
-            {#if outputs.length}
+            {#if outputsByKey.length}
               <h3 class="font-bold">Outputs</h3>
               <ul>
-                {#each outputs as _output}
-                  <span>todo !</span>
+                {#each outputsByKey as [key, outputs]}
+                  <NodeOutput {workflowName} {id} {key} value={outputs} />
                 {/each}
               </ul>
             {/if}
