@@ -5,7 +5,14 @@
 
   import { api } from "stores/api.svelte"
   import workflowStore from "stores/workflows.svelte"
-  let selectedWorkflowName = $derived(workflowStore.workflowNames[0])
+  let selectedIndex = $state(0)
+  let selectedWorkflowName = $derived(
+    workflowStore.workflowNames[selectedIndex],
+  )
+
+  function selectWorkflow(idx) {
+    selectedIndex = idx
+  }
 
   let selectedPage = $state("edit")
 
@@ -20,11 +27,10 @@
 </script>
 
 <main class="bg-base-100 drawer lg:drawer-open">
-  <Sidebar />
+  <Sidebar {selectedWorkflowName} {selectWorkflow} />
   <div class="drawer-content">
     <Navbar
       {selectedPage}
-      {selectedWorkflowName}
       selectEditPage={() => (selectedPage = "edit")}
       selectViewPage={() => (selectedPage = "view")}
       selectWorkflowPage={() => (selectedPage = "workflow")}
