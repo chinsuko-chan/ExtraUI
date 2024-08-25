@@ -33,11 +33,16 @@
   }
 
   let images = $state([])
+  let loading = $state(false)
   $effect(async () => {
     if (!Array.isArray(value)) return []
     if (!value.every((v) => v?.filename && v?.type)) return []
 
+    loading = true
+    untrack(() => loading)
     images = await Promise.all(value.map(getImageAttributes))
+    loading = false
+    untrack(() => loading)
     untrack(() => images)
   })
 
@@ -72,7 +77,15 @@
         class:grid-cols-4={imagesLayout === 4}
       >
         {#each images as attributes}
-          <img src={attributes.blob} alt={attributes.filename} />
+          <div class="relative">
+            <img src={attributes.blob} alt={attributes.filename} />
+            {#if loading}
+              <span
+                class="z-10 absolute inset-x-1/2 inset-y-1/2 loading loading-spinner"
+              ></span>
+              <div class="absolute inset-0 backdrop-blur-xl bg-white/30"></div>
+            {/if}
+          </div>
         {/each}
       </div>
     {:else}

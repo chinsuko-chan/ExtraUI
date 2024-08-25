@@ -104,6 +104,9 @@ export const api = {
   get isIdle() {
     return status === STATUS.IDLE
   },
+  get isRunning() {
+    return status === STATUS.RUNNING
+  },
   get ignorelist() {
     return ignorelist
   },

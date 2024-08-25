@@ -76,6 +76,9 @@
       onclick={runWorkflow}
     >
       Run Workflow
+      {#if api.isRunning}
+        <span class="loading loading-spinner"></span>
+      {/if}
     </button>
     {#if workflowStore.hasChanges}
       <button
