@@ -151,9 +151,7 @@
             {/if}
             {#if inputs.length}
               <h3 class="font-bold mb-2">Inputs</h3>
-              <ul class="flex flex-wrap">
-                <NodeInputs {workflowName} nodeType={node.class_type} {inputs} {id} />
-              </ul>
+              <NodeInputs {workflowName} nodeType={node.class_type} {inputs} {id} />
             {/if}
             {#if outputsByKey.length}
               <h3 class="font-bold">Outputs</h3>

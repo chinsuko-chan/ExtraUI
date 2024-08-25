@@ -2,12 +2,15 @@
   let { workflowName, nodeType, inputs, id } = $props()
 
   import Primitive from "./Primitive.svelte"
+  import LoadImage from "./LoadImage.svelte"
 </script>
 
 {#if nodeType === "LoadImage"}
-  <span>Load image!!!</span>
+  <LoadImage {workflowName} {id} {inputs} />
 {:else}
-  {#each inputs as { key, value }}
-    <Primitive {workflowName} {id} {key} {value} />
-  {/each}
+  <ul class="flex flex-wrap">
+    {#each inputs as { key, value }}
+      <Primitive {workflowName} {id} {key} {value} />
+    {/each}
+  </ul>
 {/if}
