@@ -28,8 +28,6 @@
     return nodeObj._meta?.title || nodeObj.class_type
   }
 
-  let title = $state(formatTitle(node))
-
   function toggleNode() {
     const newState = JSON.parse(JSON.stringify(localViewState.current))
 
@@ -47,6 +45,7 @@
     localViewState.save(newState)
   }
 
+  let title = $state(formatTitle(node))
   let inputsAndOutputsExpanded = $state(false)
 </script>
 

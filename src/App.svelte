@@ -31,6 +31,7 @@
   <div class="drawer-content">
     <Navbar
       {selectedPage}
+      {selectedWorkflowName}
       selectEditPage={() => (selectedPage = "edit")}
       selectViewPage={() => (selectedPage = "view")}
       selectWorkflowPage={() => (selectedPage = "workflow")}

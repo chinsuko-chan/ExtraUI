@@ -2,7 +2,7 @@
   import { connectInput } from "stores/workflows.svelte"
   let { workflowName, id, key, value } = $props()
 
-  const inputStore = connectInput(workflowName, id, key)
+  let inputStore = $derived(connectInput(workflowName, id, key))
 </script>
 
 {#if typeof value === "number"}

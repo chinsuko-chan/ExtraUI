@@ -5,7 +5,8 @@
   let { workflowName, id, key, value } = $props()
 
   import { connectWorkflow } from "stores/workflows.svelte"
-  const workflow = $derived(connectWorkflow(workflowName))
+  let workflow = $derived(connectWorkflow(workflowName))
+
   import fetchImage from "stores/imageCache.svelte"
 
   async function getImageAttributes(attributes) {

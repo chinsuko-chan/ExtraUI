@@ -7,11 +7,10 @@
   let viewState = $state(localViewState.current)
 
   import { connectInput } from "stores/workflows.svelte"
-  const inputStore = connectInput(workflowName, id, key)
+  let inputStore = $derived(connectInput(workflowName, id, key))
+  let isExpanded = $derived(!!viewState[workflowName]?.[id]?.[key])
 
   import NodeInputEditor from "./NodeInputEditor.svelte"
-
-  let isExpanded = $derived(!!viewState[workflowName]?.[id]?.[key])
 
   function toggle() {
     const newState = JSON.parse(JSON.stringify(localViewState.current))
