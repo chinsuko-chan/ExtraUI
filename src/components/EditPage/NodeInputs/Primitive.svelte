@@ -1,7 +1,8 @@
 <script>
+  // primitive is the fallback for everything that doesn't need custom
   let { workflowName, id, key, value } = $props()
 
-  const KEY = "extraUI.components.editPage.nodeInput.expandedState"
+  const KEY = "extraUI.components.editPage.nodeInputs.expandedState"
   import connect from "lib/localStore"
   const localViewState = connect(KEY, {})
   let viewState = $state(localViewState.current)
@@ -9,8 +10,6 @@
   import { connectInput } from "stores/workflows.svelte"
   let inputStore = $derived(connectInput(workflowName, id, key))
   let isExpanded = $derived(!!viewState[workflowName]?.[id]?.[key])
-
-  import NodeInputEditor from "./NodeInputEditor.svelte"
 
   function toggle() {
     const newState = JSON.parse(JSON.stringify(localViewState.current))
@@ -62,7 +61,38 @@
     </div>
     {#if isExpanded}
       <div class="collapse-content">
-        <NodeInputEditor {workflowName} {id} {key} {value} />
+        {#if typeof value === "number"}
+          <label class="form-control flex-row items-start gap-2">
+            <span
+              class="badge badge-info"
+              class:badge-outline={!inputStore.hasChanges}
+            >
+              Number
+            </span>
+            <input
+              type="number"
+              class="input input-bordered input-sm max-w-xs"
+              bind:value={inputStore.value}
+              placeholder={value}
+            />
+          </label>
+        {:else if typeof value === "string"}
+          <label class="form-control flex-row items-start gap-2">
+            <span
+              class="badge badge-success"
+              class:badge-outline={!inputStore.hasChanges}
+            >
+              String
+            </span>
+            <textarea
+              class="textarea textarea-bordered w-full"
+              bind:value={inputStore.value}
+              placeholder={value}
+            ></textarea>
+          </label>
+        {:else}
+          <span>{JSON.stringify(value)}</span>
+        {/if}
       </div>
     {/if}
   </div>

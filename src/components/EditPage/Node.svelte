@@ -20,7 +20,7 @@
 
   let expanded = $derived(!!viewState[workflowName]?.[id])
 
-  import NodeInput from "./NodeInput.svelte"
+  import NodeInputs from "./NodeInputs"
   import NodeOutput from "./NodeOutput.svelte"
   import NodeGraphInfo from "./NodeGraphInfo.svelte"
 
@@ -152,9 +152,7 @@
             {#if inputs.length}
               <h3 class="font-bold mb-2">Inputs</h3>
               <ul class="flex flex-wrap">
-                {#each inputs as { key, value }}
-                  <NodeInput {workflowName} {id} {key} {value} />
-                {/each}
+                <NodeInputs {workflowName} nodeType={node.class_type} {inputs} {id} />
               </ul>
             {/if}
             {#if outputsByKey.length}
