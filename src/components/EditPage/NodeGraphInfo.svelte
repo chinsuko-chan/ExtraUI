@@ -16,7 +16,7 @@
 
 <div class="flex justify-between mb-4">
   {#if graphInputs.length}
-    <div>
+    <section>
       <h3 class="font-bold mb-2">Graph Inputs</h3>
       <table class="table table-xs w-auto">
         <thead>
@@ -36,10 +36,10 @@
           {/each}
         </tbody>
       </table>
-    </div>
+    </section>
   {/if}
   {#if graphOutputs.length}
-    <div class="ml-auto">
+    <section class="ml-auto">
       <h3 class="font-bold mb-2">Graph Outputs</h3>
       <table class="table table-xs w-auto ml-auto">
         <thead>
@@ -59,7 +59,7 @@
           {/each}
         </tbody>
       </table>
-    </div>
+    </section>
   {/if}
 </div>
 

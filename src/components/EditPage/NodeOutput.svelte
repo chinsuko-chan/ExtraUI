@@ -2,7 +2,7 @@
   import { untrack } from "svelte"
 
   /** support rendering images, or a stringified JSON */
-  let { workflowName, id, key, value } = $props()
+  let { workflowName, toggleOutput, expanded, id, key, value } = $props()
 
   const KEY = "extraUI.components.editPage.nodeOutput.imagesLayout"
   import connect from "lib/localStore"
@@ -53,11 +53,25 @@
   }
 </script>
 
-<li>
-  <div class="flex flex-col gap-2 p-2">
-    {#if images.length}
-      <div class="flex justify-between">
-        <code class="badge badge-outline badge-primary">{key}</code>
+
+{#snippet expandButton()}
+  <button
+    class="btn btn-xs"
+    class:text-primary={!expanded}
+    class:btn-primary={expanded}
+    class:btn-outline={expanded}
+    onclick={() => toggleOutput(key)}
+  >
+    <code>{key}</code>
+  </button>
+{/snippet}
+
+<li class="p-2">
+  {#if images.length}
+    <div class="flex justify-between mb-2">
+      {@render expandButton()}
+
+      {#if expanded}
         <div>
           {#each [[1, svgCols1], [2, svgCols2], [3, svgCols3], [4, svgCols4]] as [col, svgAsset]}
             <button
@@ -69,7 +83,10 @@
             >
           {/each}
         </div>
-      </div>
+      {/if}
+    </div>
+
+    {#if expanded}
       <div
         class="grid"
         class:grid-cols-2={imagesLayout === 2}
@@ -88,12 +105,19 @@
           </div>
         {/each}
       </div>
-    {:else}
-      <!-- ambiguous element... curious... -->
-      <code class="badge badge-outline badge-primary">{key}</code>
-      <div class="bg-base-200 w-full px-4 py-2 rounded-md break-all">
-        <code class="text-sm">{JSON.stringify(value)}</code>
-      </div>
     {/if}
-  </div>
+  {:else}
+    <!-- ambiguous element... curious... -->
+    <div>
+      <div class="mb-2">
+        {@render expandButton()}
+      </div>
+
+      {#if expanded}
+        <div class="bg-base-200 w-full px-4 py-2 rounded-md break-all">
+          <code class="text-sm">{JSON.stringify(value)}</code>
+        </div>
+      {/if}
+    </div>
+  {/if}
 </li>

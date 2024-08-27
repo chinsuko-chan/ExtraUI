@@ -71,7 +71,7 @@
             </span>
             <input
               type="number"
-              class="input input-bordered input-sm max-w-xs"
+              class="input input-bordered input-sm max-w-36 sm:max-w-full"
               bind:value={inputStore.value}
               placeholder={value}
             />

@@ -38,15 +38,41 @@
       newState[workflowName] ||= {}
       viewState[workflowName] ||= {}
 
-      newState[workflowName][id] = 1
-      viewState[workflowName][id] = 1
+      newState[workflowName][id] = {}
+      viewState[workflowName][id] = {}
+    }
+
+    localViewState.save(newState)
+  }
+
+  function toggleOutput(key) {
+    const newState = JSON.parse(JSON.stringify(localViewState.current))
+
+    if (newState[workflowName]?.[id]?.outputs?.[key]) {
+      delete newState[workflowName][id].outputs[key]
+      delete viewState[workflowName][id].outputs[key]
+    } else {
+      newState[workflowName] ||= { [id]: {} }
+      viewState[workflowName] ||= { [id]: {} }
+
+      newState[workflowName][id].outputs ||= {}
+      viewState[workflowName][id].outputs ||= {}
+
+      newState[workflowName][id].outputs[key] = 1
+      viewState[workflowName][id].outputs[key] = 1
     }
 
     localViewState.save(newState)
   }
 
   let title = $state(formatTitle(node))
-  let inputsAndOutputsExpanded = $state(false)
+  let graphInfoExpanded = $state(false)
+
+  let allOutputsCollapsed = $derived.by(() => {
+    return 0 === Object.entries(viewState[workflowName]?.[id]?.outputs || {}).reduce((count, [_key, val]) => {
+      return count += Number(val)
+    }, 0)
+  })
 </script>
 
 {#snippet expansionButton()}
@@ -83,22 +109,10 @@
   </li>
 {/snippet}
 
-{#snippet expandedInfo()}
-  <div class="flex justify-between">
-    <ul>
-      {#each inputs as _input}
-        <span>input!</span>
-      {/each}
-    </ul>
-    <ul>
-      {#each outputs as _outputs}
-        <span>output!</span>
-      {/each}
-    </ul>
-  </div>
-{/snippet}
-
-<li class="flex gap-8" class:mb-16={index === finalIndex}>
+<li
+  class="flex gap-8"
+  class:max-w-lg={allOutputsCollapsed}
+  class:mb-16={index === finalIndex}>
   {@render expansionButton()}
 
   <div
@@ -122,9 +136,9 @@
         {#if expanded}
           <button
             class="btn btn-sm btn-ghost font-light opacity-50 hover:opacity-100"
-            onclick={() => inputsAndOutputsExpanded = !inputsAndOutputsExpanded}
+            onclick={() => graphInfoExpanded = !graphInfoExpanded}
           >
-            {inputsAndOutputsExpanded ? "Collapse" : "Show Graph Info"}
+            {graphInfoExpanded ? "Collapse" : "Show Graph Info"}
           </button>
         {/if}
       </header>
@@ -141,7 +155,7 @@
             </div>
           {/if}
           <div class="flex-grow">
-            {#if inputsAndOutputsExpanded}
+            {#if graphInfoExpanded}
               <NodeGraphInfo
                 {workflowName}
                 nodeTitle={title}
@@ -157,7 +171,7 @@
               <h3 class="font-bold">Outputs</h3>
               <ul>
                 {#each outputsByKey as [key, outputs]}
-                  <NodeOutput {workflowName} {id} {key} value={outputs} />
+                  <NodeOutput {workflowName} {id} {key} value={outputs} expanded={!!viewState[workflowName]?.[id]?.outputs?.[key]} {toggleOutput} />
                 {/each}
               </ul>
             {/if}
