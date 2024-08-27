@@ -45,6 +45,26 @@
     localViewState.save(newState)
   }
 
+  function toggleInput(key) {
+    const newState = JSON.parse(JSON.stringify(localViewState.current))
+
+    if (newState[workflowName]?.[id]?.inputs?.[key]) {
+      delete newState[workflowName][id].inputs[key]
+      delete viewState[workflowName][id].inputs[key]
+    } else {
+      newState[workflowName] ||= { [id]: {} }
+      viewState[workflowName] ||= { [id]: {} }
+
+      newState[workflowName][id].inputs ||= {}
+      viewState[workflowName][id].inputs ||= {}
+
+      newState[workflowName][id].inputs[key] = 1
+      viewState[workflowName][id].inputs[key] = 1
+    }
+
+    localViewState.save(newState)
+  }
+
   function toggleOutput(key) {
     const newState = JSON.parse(JSON.stringify(localViewState.current))
 
@@ -164,14 +184,27 @@
               />
             {/if}
             {#if inputs.length}
-              <h3 class="font-bold mb-2">Inputs</h3>
-              <NodeInputs {workflowName} nodeType={node.class_type} {inputs} {id} />
+              <NodeInputs
+                {workflowName}
+                nodeType={node.class_type}
+                {inputs}
+                {id}
+                expandedState={viewState[workflowName]?.[id]?.inputs || {}}
+                {toggleInput}
+              />
             {/if}
             {#if outputsByKey.length}
               <h3 class="font-bold">Outputs</h3>
               <ul>
                 {#each outputsByKey as [key, outputs]}
-                  <NodeOutput {workflowName} {id} {key} value={outputs} expanded={!!viewState[workflowName]?.[id]?.outputs?.[key]} {toggleOutput} />
+                  <NodeOutput
+                    {workflowName}
+                    {id}
+                    {key}
+                    value={outputs}
+                    expanded={!!viewState[workflowName]?.[id]?.outputs?.[key]}
+                    {toggleOutput}
+                  />
                 {/each}
               </ul>
             {/if}

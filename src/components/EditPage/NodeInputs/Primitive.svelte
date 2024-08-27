@@ -1,34 +1,11 @@
 <script>
   // primitive is the fallback for everything that doesn't need custom
-  let { workflowName, id, key, value } = $props()
-
-  const KEY = "extraUI.components.editPage.nodeInputs.expandedState"
-  import connect from "lib/localStore"
-  const localViewState = connect(KEY, {})
-  let viewState = $state(localViewState.current)
+  let { workflowName, id, key, value, expandedState, toggleInput } = $props()
 
   import { connectInput } from "stores/workflows.svelte"
   let inputStore = $derived(connectInput(workflowName, id, key))
-  let isExpanded = $derived(!!viewState[workflowName]?.[id]?.[key])
 
-  function toggle() {
-    const newState = JSON.parse(JSON.stringify(localViewState.current))
-
-    if (newState[workflowName]?.[id]?.[key]) {
-      delete newState[workflowName][id][key]
-      delete viewState[workflowName][id][key]
-    } else {
-      newState[workflowName] ||= {}
-      newState[workflowName][id] ||= {}
-      viewState[workflowName] ||= {}
-      viewState[workflowName][id] ||= {}
-
-      newState[workflowName][id][key] = 1
-      viewState[workflowName][id][key] = 1
-    }
-
-    localViewState.save(newState)
-  }
+  let isExpanded = $derived(!!expandedState[key])
 </script>
 
 <li
@@ -44,7 +21,7 @@
       class={isExpanded ? null : "absolute inset"}
       type="checkbox"
       checked={isExpanded}
-      onchange={toggle}
+      onchange={() => toggleInput(key)}
     />
     <div
       class="collapse-title flex items-center min-h-4 hover:bg-primary"
