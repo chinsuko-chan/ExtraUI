@@ -17,7 +17,7 @@
   let nodes = $derived(workflowStore.current?.nodes || [])
 </script>
 
-<article class="mx-4">
+<article>
   <ul class="py-2">
     {#each nodes as node, index}
       <Node

@@ -2,13 +2,16 @@ import connect from "lib/localStore"
 
 const WORKFLOWS_KEY = "extraUI.stores.workflow.allWorkflows"
 const CHANGES_KEY = "extraUI.stores.workflow.allChanges"
+const PINNED_INPUTS_KEY = "extraUI.stores.workflow.allPinnedInputs"
 
 const localWorkflows = connect(WORKFLOWS_KEY, {})
 const localChanges = connect(CHANGES_KEY, {})
+const localPinnedInputs = connect(PINNED_INPUTS_KEY, {})
 
 // These are "raw" , not meant to be consumed directly
 let allWorkflows = $state(localWorkflows.current)
 let allChanges = $state(localChanges.current)
+let allPinnedInputs = $state(localPinnedInputs.current)
 
 // This is the public api shape (array of objs.)
 function reduceWorkflows(output, [workflowName, workflow]) {
@@ -64,6 +67,36 @@ let changes = $derived.by(() => {
   return Object.entries(allChanges).reduce(reduceWorkflows, [])
 })
 
+function reducePins(output, [workflowName, nodeState]) {
+  const nodes = []
+  Object.entries(nodeState).forEach(([nodeId, keyState]) => {
+    const pinnedKeys = Object.keys(keyState).filter((key) =>
+      Boolean(keyState[key]),
+    )
+    if (!pinnedKeys.length) return
+
+    const keys = pinnedKeys.map((key) => {
+      return {
+        key,
+        offsetHeight: keyState[key],
+      }
+    })
+
+    nodes.push({ id: nodeId, keys })
+  })
+
+  output.push({ name: workflowName, nodes })
+  return output
+}
+
+// in shape:
+// { name: { node: { key } } }
+// out shape:
+// { name, inputs: { id, keys: { key, offsetHeight }[] }[] }[]
+let workflowPins = $derived.by(() => {
+  return Object.entries(allPinnedInputs).reduce(reducePins, [])
+})
+
 export default {
   get workflows() {
     return workflows
@@ -74,12 +107,19 @@ export default {
   get workflowNames() {
     return Object.keys(allWorkflows)
   },
+  get workflowPins() {
+    return workflowPins
+  },
   save() {
     localWorkflows.save(allWorkflows)
   },
 }
 
 // util
+
+export function getPinnedNodes(workflowName) {
+  return workflowPins.find(({ name }) => name === workflowName)?.nodes || []
+}
 
 export function getWorkflow(workflowName, source = null) {
   source ||= workflows
@@ -192,6 +232,44 @@ export function connectInput(workflowName, nodeId, inputKey) {
     },
     get isChanged() {
       return inputHasChanges(workflowName, nodeId, inputKey)
+    },
+    get isPinned() {
+      return !!allPinnedInputs[workflowName]?.[nodeId]?.[inputKey]
+    },
+    pin(offsetHeight = 1) {
+      allPinnedInputs[workflowName] ||= {}
+      allPinnedInputs[workflowName][nodeId] ||= {}
+      allPinnedInputs[workflowName][nodeId][inputKey] = offsetHeight
+      localPinnedInputs.save(allPinnedInputs)
+    },
+    get offsetHeight() {
+      return allPinnedInputs[workflowName]?.[nodeId]?.[inputKey] || 0
+    },
+    set offsetHeight(newHeight) {
+      allPinnedInputs[workflowName] ||= {}
+      allPinnedInputs[workflowName][nodeId] ||= {}
+      allPinnedInputs[workflowName][nodeId][inputKey] = newHeight
+      localPinnedInputs.save(allPinnedInputs)
+    },
+    get actualOffsetHeight() {
+      // tldr = sum all heights UPTO (but excluding) inputKey
+      let height = 0
+      workflowPins.some(({ nodes }) => {
+        return nodes.some(({ keys }) => {
+          return keys.some(({ key, offsetHeight }) => {
+            if (key === inputKey) return true
+
+            height += offsetHeight
+            return false
+          })
+        })
+      })
+
+      return height
+    },
+    unpin() {
+      delete allPinnedInputs[workflowName][nodeId][inputKey]
+      localPinnedInputs.save(allPinnedInputs)
     },
   }
 }

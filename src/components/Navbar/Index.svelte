@@ -61,7 +61,7 @@
 </script>
 
 <nav
-  class="navbar z-10 gap-2 bg-base-100 bg-opacity-80 shadow-sm backdrop-blur-lg sticky top-0"
+  class="navbar z-30 gap-2 bg-base-100 bg-opacity-80 shadow-sm backdrop-blur-lg sticky top-0"
 >
   <div class="justify-start">
     <label for={drawerId} class="btn btn-ghost btn-circle lg:hidden">
