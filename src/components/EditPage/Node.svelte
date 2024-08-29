@@ -96,7 +96,7 @@
 </script>
 
 {#snippet expansionButton()}
-  <div class="self-stretch">
+  <span class="self-stretch">
     <div class="h-full flex flex-col">
       <button
         class="btn btn-xs btn-circle my-1"
@@ -109,7 +109,7 @@
         <hr class="w-1 min-h-2 flex-grow mx-auto border-base-300 bg-base-300 rounded-lg" />
       {/if}
     </div>
-  </div>
+  </span>
 {/snippet}
 
 {#snippet graphInputOutputAnchor({ key, value }, isOutput = false)}
@@ -129,98 +129,120 @@
   </li>
 {/snippet}
 
+{#snippet graphInputsColumn()}
+  {#if graphInputs.length && !graphInfoExpanded}
+    <aside class="pb-2">
+      <ul class="flex flex-col gap-2 items-center">
+        {#each graphInputs as input}
+          {@render graphInputOutputAnchor(input)}
+        {/each}
+      </ul>
+    </aside>
+  {/if}
+{/snippet}
+
+{#snippet graphOutputsColumn()}
+  {#if graphOutputs.length && !graphInfoExpanded}
+    <aside class="pb-2">
+      <ul class="flex flex-col gap-2 items-center">
+        {#each graphOutputs as output}
+          {@render graphInputOutputAnchor(output, true)}
+        {/each}
+      </ul>
+    </aside>
+  {/if}
+{/snippet}
+
+{#snippet inputsSection()}
+  {#if inputs.length}
+    <section>
+      <NodeInputs
+        {workflowName}
+        nodeType={node.class_type}
+        {inputs}
+        {id}
+        expandedState={viewState[workflowName]?.[id]?.inputs || {}}
+        {toggleInput}
+      />
+    </section>
+  {/if}
+{/snippet}
+
+{#snippet outputsSection()}
+  {#if outputsByKey.length}
+    <section>
+      <h3 class="font-bold">Outputs</h3>
+      <ul>
+        {#each outputsByKey as [key, outputs]}
+          <NodeOutput
+            {workflowName}
+            {id}
+            {key}
+            value={outputs}
+            expanded={!!viewState[workflowName]?.[id]?.outputs?.[key]}
+            {toggleOutput}
+          />
+        {/each}
+      </ul>
+    </section>
+  {/if}
+{/snippet}
+
 <li
-  class="flex gap-8"
-  class:max-w-lg={allOutputsCollapsed}
+  class="flex gap-3"
+  class:max-w-lg={allOutputsCollapsed && !graphInfoExpanded}
   class:mb-16={index === finalIndex}>
   {@render expansionButton()}
 
   <div
-    class:mt-1={!expanded}
+    class="py-1"
     class:mb-2={expanded}
+    class:px-3={expanded}
     class:timeline-box={expanded}
-    class:flex-grow={expanded}
   >
-    <section>
-      <header class="flex justify-between" class:mb-3={expanded}>
-        <h2 id={`node-${id}`}>
-          <a aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
-            <span
-              class="mr-1 opacity-20 hover:opacity-60 text-base font-bold inline-block align-middle relative -mt-1"
-              >#</span
-            >
-          </a>
-          {title}
-        </h2>
+  <header class="flex justify-between items-center" class:mb-2={expanded}>
+    <h2 id={`node-${id}`}>
+      <a aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
+        <span
+          class="mr-1 opacity-20 hover:opacity-60 text-base font-bold inline-block align-middle relative -mt-1"
+          >#</span
+        >
+      </a>
+      {title}
+    </h2>
 
-        {#if expanded}
-          <button
-            class="btn btn-sm btn-ghost font-light opacity-50 hover:opacity-100"
-            onclick={() => graphInfoExpanded = !graphInfoExpanded}
-          >
-            {graphInfoExpanded ? "Collapse" : "Show Graph Info"}
-          </button>
+    {#if expanded}
+      <button
+        class="btn btn-sm btn-ghost font-light opacity-50 hover:opacity-100"
+        onclick={() => graphInfoExpanded = !graphInfoExpanded}
+      >
+        {graphInfoExpanded ? "Collapse" : "Show Graph Info"}
+      </button>
+    {/if}
+  </header>
+
+  {#if expanded}
+    <div class="flex flex-nowrap gap-3">
+      {@render graphInputsColumn()}
+
+      <div class="flex-grow">
+        {#if graphInfoExpanded}
+          <NodeGraphInfo
+            {workflowName}
+            nodeTitle={title}
+            {graphInputs}
+            {graphOutputs}
+          />
         {/if}
-      </header>
 
-      {#if expanded}
-        <div class="flex flex-nowrap gap-4">
-          {#if graphInputs.length}
-            <div>
-              <ul class="flex flex-col gap-2 items-center">
-                {#each graphInputs as input}
-                  {@render graphInputOutputAnchor(input)}
-                {/each}
-              </ul>
-            </div>
-          {/if}
-          <div class="flex-grow">
-            {#if graphInfoExpanded}
-              <NodeGraphInfo
-                {workflowName}
-                nodeTitle={title}
-                {graphInputs}
-                {graphOutputs}
-              />
-            {/if}
-            {#if inputs.length}
-              <NodeInputs
-                {workflowName}
-                nodeType={node.class_type}
-                {inputs}
-                {id}
-                expandedState={viewState[workflowName]?.[id]?.inputs || {}}
-                {toggleInput}
-              />
-            {/if}
-            {#if outputsByKey.length}
-              <h3 class="font-bold">Outputs</h3>
-              <ul>
-                {#each outputsByKey as [key, outputs]}
-                  <NodeOutput
-                    {workflowName}
-                    {id}
-                    {key}
-                    value={outputs}
-                    expanded={!!viewState[workflowName]?.[id]?.outputs?.[key]}
-                    {toggleOutput}
-                  />
-                {/each}
-              </ul>
-            {/if}
-          </div>
-          {#if graphOutputs.length}
-            <div>
-              <ul class="flex flex-col gap-2 items-center">
-                {#each graphOutputs as output}
-                  {@render graphInputOutputAnchor(output, true)}
-                {/each}
-              </ul>
-            </div>
-          {/if}
-        </div>
-      {/if}
-    </section>
+        {@render inputsSection()}
+
+        {@render outputsSection()}
+      </div>
+
+      {@render graphOutputsColumn()}
+    </div>
+  {/if}
   </div>
 </li>
 

@@ -47,7 +47,7 @@
   }
 </script>
 
-<div class="grid grid-cols-2 gap-2">
+<div class="grid grid-cols-2 gap-2 pb-2">
   <input bind:this={fileUpload} type="file" onchange={uploadAndSelectFile} />
   {#if currentImage}
     <img class="max-h-96" src={currentImage.blob} alt={currentImage.filename} />

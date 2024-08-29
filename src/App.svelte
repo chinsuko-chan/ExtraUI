@@ -3,8 +3,6 @@
   import Navbar from "components/Navbar"
   import EditPage from "components/EditPage"
 
-  import PinnedInputs from "components/PinnedInputs"
-
   import workflowStore from "stores/workflows.svelte"
   let selectedIndex = $state(0)
   let selectedWorkflowName = $derived(
@@ -28,10 +26,7 @@
       selectViewPage={() => (selectedPage = "view")}
       selectWorkflowPage={() => (selectedPage = "workflow")}
     />
-    <div class="mx-4 flex">
-      {#if workflowStore.workflowPins.length}
-        <PinnedInputs workflowPins={workflowStore.workflowPins} />
-      {/if}
+    <div>
       {#if selectedPage === "edit"}
         <EditPage {selectedWorkflowName} />
       {:else if selectedPage === "view"}
