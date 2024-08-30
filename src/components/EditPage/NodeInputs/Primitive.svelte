@@ -28,7 +28,6 @@
   </span>
 {/snippet}
 
-<!-- class={`bg-base-100 ${inputStore.isPinned ? "shadow-warning/50" : ""}`} -->
 <li
   class="bg-base-100"
   class:w-full={isExpanded}
@@ -95,7 +94,11 @@
             ></textarea>
           </label>
         {:else}
-          <span>{JSON.stringify(value)}</span>
+          <div class="bg-base-200 w-full px-4 py-2 rounded-md break-all">
+            <code class="text-xs">
+              {JSON.stringify(value)}
+            </code>
+          </div>
         {/if}
       </div>
     {/if}

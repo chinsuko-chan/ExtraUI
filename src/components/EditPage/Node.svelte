@@ -190,7 +190,7 @@
 
 <li
   class="flex gap-3"
-  class:max-w-lg={allOutputsCollapsed && !graphInfoExpanded}
+  class:max-w-md={allOutputsCollapsed && !graphInfoExpanded}
   class:mb-16={index === finalIndex}>
   {@render expansionButton()}
 

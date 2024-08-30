@@ -115,7 +115,7 @@
 
       {#if expanded}
         <div class="bg-base-200 w-full px-4 py-2 rounded-md break-all">
-          <code class="text-sm">{JSON.stringify(value)}</code>
+          <code class="text-xs">{JSON.stringify(value)}</code>
         </div>
       {/if}
     </div>

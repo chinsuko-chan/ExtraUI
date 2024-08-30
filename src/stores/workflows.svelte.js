@@ -75,12 +75,7 @@ function reducePins(output, [workflowName, nodeState]) {
     )
     if (!pinnedKeys.length) return
 
-    const keys = pinnedKeys.map((key) => {
-      return {
-        key,
-        offsetHeight: keyState[key],
-      }
-    })
+    const keys = pinnedKeys.map((key) => ({ key }))
 
     nodes.push({ id: nodeId, keys })
   })
@@ -92,7 +87,7 @@ function reducePins(output, [workflowName, nodeState]) {
 // in shape:
 // { name: { node: { key } } }
 // out shape:
-// { name, inputs: { id, keys: { key, offsetHeight }[] }[] }[]
+// { name, inputs: { id, keys: { key: string }[] }[] }[]
 let workflowPins = $derived.by(() => {
   return Object.entries(allPinnedInputs).reduce(reducePins, [])
 })
@@ -236,36 +231,11 @@ export function connectInput(workflowName, nodeId, inputKey) {
     get isPinned() {
       return !!allPinnedInputs[workflowName]?.[nodeId]?.[inputKey]
     },
-    pin(offsetHeight = 1) {
+    pin() {
       allPinnedInputs[workflowName] ||= {}
       allPinnedInputs[workflowName][nodeId] ||= {}
-      allPinnedInputs[workflowName][nodeId][inputKey] = offsetHeight
+      allPinnedInputs[workflowName][nodeId][inputKey] = 1
       localPinnedInputs.save(allPinnedInputs)
-    },
-    get offsetHeight() {
-      return allPinnedInputs[workflowName]?.[nodeId]?.[inputKey] || 0
-    },
-    set offsetHeight(newHeight) {
-      allPinnedInputs[workflowName] ||= {}
-      allPinnedInputs[workflowName][nodeId] ||= {}
-      allPinnedInputs[workflowName][nodeId][inputKey] = newHeight
-      localPinnedInputs.save(allPinnedInputs)
-    },
-    get actualOffsetHeight() {
-      // tldr = sum all heights UPTO (but excluding) inputKey
-      let height = 0
-      workflowPins.some(({ nodes }) => {
-        return nodes.some(({ keys }) => {
-          return keys.some(({ key, offsetHeight }) => {
-            if (key === inputKey) return true
-
-            height += offsetHeight
-            return false
-          })
-        })
-      })
-
-      return height
     },
     unpin() {
       delete allPinnedInputs[workflowName][nodeId][inputKey]

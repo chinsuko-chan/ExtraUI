@@ -61,7 +61,7 @@
 </script>
 
 <nav
-  class="navbar z-30 gap-2 bg-base-100 bg-opacity-80 shadow-sm backdrop-blur-lg sticky top-0"
+  class="navbar z-30 gap-2 bg-base-100/80 shadow-sm backdrop-blur-lg sticky top-0"
 >
   <div class="justify-start">
     <label for={drawerId} class="btn btn-ghost btn-circle lg:hidden">
@@ -120,18 +120,15 @@
     </ul>
   </div>
 
-  {#if workflowStore.current}
-    {#if workflowStore.hasChanges}
-      <div class="navbar-end flex-grow gap-2">
-        <button
-          class="btn btn-sm btn-warning"
-          onclick={workflowStore.keepChanges}>Save</button
-        >
-        <button
-          class="btn btn-sm btn-outline btn-error"
-          onclick={workflowStore.revertChanges}>Revert</button
-        >
-      </div>
+  <div class="navbar-end flex-grow gap-2">
+    {#if workflowStore.current && workflowStore.hasChanges}
+      <button class="btn btn-sm btn-warning" onclick={workflowStore.keepChanges}
+        >Save</button
+      >
+      <button
+        class="btn btn-sm btn-outline btn-error"
+        onclick={workflowStore.revertChanges}>Revert</button
+      >
     {/if}
-  {/if}
+  </div>
 </nav>
