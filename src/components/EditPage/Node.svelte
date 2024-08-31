@@ -189,7 +189,7 @@
 {/snippet}
 
 <li
-  class="flex gap-3"
+  class="flex gap-2 md:gap-3"
   class:max-w-md={allOutputsCollapsed && !graphInfoExpanded}
   class:mb-16={index === finalIndex}
 >
@@ -203,9 +203,9 @@
   >
     <header class="flex justify-between items-center" class:mb-2={expanded}>
       <h2 id={`node-${id}`}>
-        <a aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
+        <a class="opacity-20 hover:opacity-60" class:mr-2={expanded} class:px-3={!expanded} aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
           <span
-            class="mr-1 opacity-20 hover:opacity-60 text-base font-bold inline-block align-middle relative -mt-1"
+            class="text-base font-bold inline-block align-middle relative -mt-1"
             >#</span
           >
         </a>

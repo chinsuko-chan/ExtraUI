@@ -17,6 +17,8 @@
   import menuSvg from "assets/amburg.svg?raw"
 
   import runAndGoSvg from "assets/run-n-go.svg?raw"
+  import saveSvg from "assets/save.svg?raw"
+  import undoSvg from "assets/undo.svg?raw"
 
   import editSvg from "assets/pencil.svg?raw"
   import viewSvg from "assets/eye.svg?raw"
@@ -63,13 +65,10 @@
 <nav
   class="navbar z-30 py-1.5 gap-2 bg-base-100/80 shadow-sm backdrop-blur-lg sticky top-0"
 >
-  <div class="justify-start">
+  <div class="navbar-start">
     <label for={drawerId} class="btn btn-ghost btn-circle lg:hidden">
       {@html menuSvg}
     </label>
-  </div>
-
-  <div class="navbar-start">
     <button
       class="btn btn-sm btn-outline btn-success"
       disabled={!api.isIdle || workflowStore.hasChanges}
@@ -120,15 +119,37 @@
     </ul>
   </div>
 
-  <div class="navbar-end flex-grow gap-2">
+  <div class="navbar-end gap-3">
     {#if workflowStore.current && workflowStore.hasChanges}
-      <button class="btn btn-sm btn-warning" onclick={workflowStore.keepChanges}
-        >Save</button
-      >
-      <button
-        class="btn btn-sm btn-outline btn-error"
-        onclick={workflowStore.revertChanges}>Revert</button
-      >
+      <!-- read: use text above sm -->
+      <div class="contents md:hidden">
+        <button
+          class="btn btn-sm btn-warning"
+          onclick={workflowStore.keepChanges}
+        >
+          {@html saveSvg}
+        </button>
+        <button
+          class="btn btn-circle btn-sm btn-outline btn-error"
+          onclick={workflowStore.revertChanges}
+        >
+          {@html undoSvg}
+        </button>
+      </div>
+      <div class="hidden md:contents">
+        <button
+          class="btn btn-sm btn-warning"
+          onclick={workflowStore.keepChanges}
+        >
+          Save
+        </button>
+        <button
+          class="btn btn-sm btn-outline btn-error"
+          onclick={workflowStore.revertChanges}
+        >
+          Revert
+        </button>
+      </div>
     {/if}
   </div>
 </nav>
