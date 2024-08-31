@@ -4,6 +4,9 @@
   import Node from "./Node.svelte"
 
   import { connectHistory } from "stores/execution.svelte"
+
+  let nodeConfigModal
+
   // todo: move this to workflows store?
   let executions = $derived(connectHistory(selectedWorkflowName))
   let allResults = $derived(executions.results)
@@ -15,6 +18,13 @@
   let workflowStore = $derived(connectWorkflow(selectedWorkflowName))
 
   let nodes = $derived(workflowStore.current?.nodes || [])
+
+  // renameNode, updateNodeId
+  let modalAction = $state("renameNode")
+  function openModal(actionName) {
+    modalAction = actionName
+    nodeConfigModal.showModal()
+  }
 </script>
 
 <article class="mx-3 md:ml-8">
@@ -31,7 +41,22 @@
         inputs={node.inputs}
         graphOutputs={node.graphOutputs}
         outputs={mostRecentOutputs[node.id] || []}
+        openRenameModal={() => openModal("renameNode")}
+        openUpdateNodeIdModal={() => openModal("updateNodeId")}
       />
     {/each}
   </ul>
+
+  <dialog bind:this={nodeConfigModal} class="modal">
+    <div class="modal-box">
+      {#if modalAction === "renameNode"}
+        <span>rename</span>
+      {:else if modalAction === "updateNodeId"}
+        <span>update id</span>
+      {/if}
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 </article>

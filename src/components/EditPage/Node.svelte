@@ -14,6 +14,8 @@
     graphInputs,
     outputs,
     graphOutputs,
+    openRenameModal,
+    openUpdateNodeIdModal,
   } = $props()
 
   let outputsByKey = $derived(Object.entries(outputs))
@@ -230,11 +232,20 @@
 
 {#snippet expansionSection()}
   {#if fullyExpanded}
-    <div class="px-3 py-2 rounded-md bg-base-200/50">
+    <div class="grid gap-2 px-3 py-2 rounded-md bg-base-200/50">
       <section class="flex justify-between items-center gap-3">
-        <h3 class:font-bold={graphInfoExpanded}>Graph Info</h3>
+        <h3 class:text-xs={!graphInfoExpanded} class:font-bold={graphInfoExpanded}>Graph Info</h3>
         <button class="btn btn-sm btn-neutral border-transparent" class:btn-outline={!graphInfoExpanded} onclick={toggleGraphInfo}>
           {graphInfoExpanded ? "Hide" : "Show"}
+        </button>
+      </section>
+
+      <section class="grid grid-cols-2 gap-3">
+        <button class="btn btn-xs btn-outline mx-auto" onclick={openRenameModal}>
+          <span>Rename Node</span>
+        </button>
+        <button class="btn btn-xs btn-outline mx-auto" onclick={openUpdateNodeIdModal}>
+          <span>Update ID</span>
         </button>
       </section>
     </div>
