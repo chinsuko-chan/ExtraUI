@@ -25,8 +25,8 @@
       {selectedPage}
       {selectedWorkflowName}
       selectEditPage={() => (selectedPage = "edit")}
-      selectViewPage={() => (selectedPage = "view")}
       selectWorkflowPage={() => (selectedPage = "workflow")}
+      selectViewPage={() => (selectedPage = "view")}
     />
     <div>
       <PinnedInputs

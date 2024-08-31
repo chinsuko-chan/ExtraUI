@@ -12,7 +12,7 @@
 </script>
 
 <input id={drawerId} type="checkbox" class="drawer-toggle" />
-<div class="drawer-side border-base-200 border-x border-l-0 z-10">
+<div class="drawer-side border-base-200 border-x border-l-0 z-40">
   <label for={drawerId} class="drawer-overlay"></label>
   <aside class="flex flex-col bg-base-100 min-h-screen w-80">
 

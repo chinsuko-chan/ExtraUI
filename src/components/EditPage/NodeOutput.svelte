@@ -72,7 +72,7 @@
       {@render expandButton()}
 
       {#if expanded}
-        <div>
+        <div class="flex">
           {#each [[1, svgCols1], [2, svgCols2], [3, svgCols3], [4, svgCols4]] as [col, svgAsset]}
             <button
               class="btn btn-sm"

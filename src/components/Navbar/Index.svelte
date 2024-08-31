@@ -61,7 +61,7 @@
 </script>
 
 <nav
-  class="navbar z-30 gap-2 bg-base-100/80 shadow-sm backdrop-blur-lg sticky top-0"
+  class="navbar z-30 py-1.5 gap-2 bg-base-100/80 shadow-sm backdrop-blur-lg sticky top-0"
 >
   <div class="justify-start">
     <label for={drawerId} class="btn btn-ghost btn-circle lg:hidden">
@@ -75,14 +75,14 @@
       disabled={!api.isIdle || workflowStore.hasChanges}
       onclick={runWorkflow}
     >
-      Run Workflow
+      Run
       {#if api.isRunning}
         <span class="loading loading-spinner"></span>
       {/if}
     </button>
     {#if workflowStore.hasChanges}
       <button
-        class="btn btn-sm btn-circle btn-success w-12 ml-4"
+        class="hidden md:inline-flex btn btn-sm btn-circle btn-success w-12 ml-4"
         title="Save current changes and run the workflow."
         onclick={saveAndRun}
       >
@@ -92,10 +92,10 @@
   </div>
 
   <div class="navbar-center">
-    <ul class="menu menu-horizontal bg-base-200 rounded-box">
+    <ul class="menu menu-horizontal py-1.5 bg-base-200 rounded-box">
       <li>
         <button
-          class="hover:text-base-content"
+          class="btn btn-xs md:btn-sm shadow-none hover:text-base-content"
           class:bg-primary={selectedPage === "edit"}
           class:text-primary-content={selectedPage === "edit"}
           onclick={selectEditPage}>{@html editSvg}</button
@@ -103,18 +103,18 @@
       </li>
       <li>
         <button
-          class="hover:text-base-content"
-          class:bg-primary={selectedPage === "view"}
-          class:text-primary-content={selectedPage === "view"}
-          onclick={selectViewPage}>{@html viewSvg}</button
+          class="btn btn-xs md:btn-sm shadow-none hover:text-base-content"
+          class:bg-primary={selectedPage === "workflow"}
+          class:text-primary-content={selectedPage === "workflow"}
+          onclick={selectWorkflowPage}>{@html workflowSvg}</button
         >
       </li>
       <li>
         <button
-          class="hover:text-base-content"
-          class:bg-primary={selectedPage === "workflow"}
-          class:text-primary-content={selectedPage === "workflow"}
-          onclick={selectWorkflowPage}>{@html workflowSvg}</button
+          class="btn btn-xs md:btn-sm shadow-none hover:text-base-content"
+          class:bg-primary={selectedPage === "view"}
+          class:text-primary-content={selectedPage === "view"}
+          onclick={selectViewPage}>{@html viewSvg}</button
         >
       </li>
     </ul>
@@ -132,3 +132,22 @@
     {/if}
   </div>
 </nav>
+
+<!-- overlay for navbar controls on mobile -->
+<div class="fixed md:hidden inset-0 z-30 pointer-events-none">
+  <div class="p-3 h-full">
+    <div class="relative h-full">
+      {#if workflowStore.hasChanges}
+        <div class="absolute bottom-0 right-0">
+          <button
+            class="btn btm-sm btn-circle btn-success pointer-events-auto"
+            title="Save current changes and run the workflow."
+            onclick={saveAndRun}
+          >
+            {@html runAndGoSvg}
+          </button>
+        </div>
+      {/if}
+    </div>
+  </div>
+</div>
