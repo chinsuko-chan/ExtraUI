@@ -9,6 +9,9 @@
   let inputStore = $derived(connectInput(workflowName, id, key))
 
   let isExpanded = $derived(!!expandedState[key])
+  let isEditable = $derived.by(() => {
+    return typeof value === "number" || typeof value === "string"
+  })
 
   function togglePin() {
     if (inputStore.isPinned) {
@@ -26,6 +29,27 @@
   >
     {text}
   </span>
+{/snippet}
+
+{#snippet editableInput()}
+  <label class="form-control flex-col md:flex-row items-start gap-2">
+    {#if typeof value === "number"}
+        {@render badge("Number", "badge-info")}
+        <input
+          type="number"
+          class="input input-sm input-bordered w-full md:max-w-36"
+          bind:value={inputStore.value}
+          placeholder={value}
+        />
+    {:else if typeof value === "string"}
+      {@render badge("String", "badge-success")}
+      <textarea
+        class="textarea textarea-sm textarea-bordered w-full"
+        bind:value={inputStore.value}
+        placeholder={value}
+      ></textarea>
+    {/if}
+  </label>
 {/snippet}
 
 <li
@@ -74,25 +98,9 @@
     </div>
     {#if isExpanded}
       <div class="collapse-content px-3 pb-3">
-        {#if typeof value === "number"}
-          <label class="form-control flex-row items-start gap-2">
-            {@render badge("Number", "badge-info")}
-            <input
-              type="number"
-              class="input input-bordered input-sm max-w-36 sm:max-w-full"
-              bind:value={inputStore.value}
-              placeholder={value}
-            />
-          </label>
-        {:else if typeof value === "string"}
-          <label class="form-control flex-row items-start gap-2">
-            {@render badge("String", "badge-success")}
-            <textarea
-              class="textarea textarea-bordered w-full"
-              bind:value={inputStore.value}
-              placeholder={value}
-            ></textarea>
-          </label>
+
+        {#if isEditable}
+          {@render editableInput()}
         {:else}
           <div class="bg-base-200 w-full px-4 py-2 rounded-md break-all">
             <code class="text-xs">

@@ -66,7 +66,7 @@
   </button>
 {/snippet}
 
-<li class="p-2">
+<li class="py-2 md:px-2">
   {#if images.length}
     <div class="flex justify-between mb-2">
       {@render expandButton()}

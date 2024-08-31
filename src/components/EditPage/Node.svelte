@@ -143,7 +143,7 @@
 
 {#snippet graphOutputsColumn()}
   {#if graphOutputs.length && !graphInfoExpanded}
-    <aside class="pb-2">
+    <aside class="pb-2 ml-auto">
       <ul class="flex flex-col gap-2 items-center">
         {#each graphOutputs as output}
           {@render graphInputOutputAnchor(output, true)}
@@ -191,7 +191,8 @@
 <li
   class="flex gap-3"
   class:max-w-md={allOutputsCollapsed && !graphInfoExpanded}
-  class:mb-16={index === finalIndex}>
+  class:mb-16={index === finalIndex}
+>
   {@render expansionButton()}
 
   <div
@@ -200,49 +201,49 @@
     class:px-3={expanded}
     class:timeline-box={expanded}
   >
-  <header class="flex justify-between items-center" class:mb-2={expanded}>
-    <h2 id={`node-${id}`}>
-      <a aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
-        <span
-          class="mr-1 opacity-20 hover:opacity-60 text-base font-bold inline-block align-middle relative -mt-1"
-          >#</span
+    <header class="flex justify-between items-center" class:mb-2={expanded}>
+      <h2 id={`node-${id}`}>
+        <a aria-hidden="true" tabindex="-1" href={`#node-${id}`}>
+          <span
+            class="mr-1 opacity-20 hover:opacity-60 text-base font-bold inline-block align-middle relative -mt-1"
+            >#</span
+          >
+        </a>
+        {title}
+      </h2>
+
+      {#if expanded}
+        <button
+          class="btn btn-sm btn-ghost font-light opacity-50 hover:opacity-100"
+          onclick={() => graphInfoExpanded = !graphInfoExpanded}
         >
-      </a>
-      {title}
-    </h2>
+          {graphInfoExpanded ? "Collapse" : "Show Graph Info"}
+        </button>
+      {/if}
+    </header>
 
     {#if expanded}
-      <button
-        class="btn btn-sm btn-ghost font-light opacity-50 hover:opacity-100"
-        onclick={() => graphInfoExpanded = !graphInfoExpanded}
-      >
-        {graphInfoExpanded ? "Collapse" : "Show Graph Info"}
-      </button>
-    {/if}
-  </header>
+      <div class="flex flex-nowrap gap-3">
+        {@render graphInputsColumn()}
 
-  {#if expanded}
-    <div class="flex flex-nowrap gap-3">
-      {@render graphInputsColumn()}
+        <div>
+          {#if graphInfoExpanded}
+            <NodeGraphInfo
+              {workflowName}
+              nodeTitle={title}
+              {graphInputs}
+              {graphOutputs}
+            />
+          {/if}
 
-      <div class="flex-grow">
-        {#if graphInfoExpanded}
-          <NodeGraphInfo
-            {workflowName}
-            nodeTitle={title}
-            {graphInputs}
-            {graphOutputs}
-          />
-        {/if}
+          {@render inputsSection()}
 
-        {@render inputsSection()}
+          {@render outputsSection()}
+        </div>
 
-        {@render outputsSection()}
+        {@render graphOutputsColumn()}
       </div>
-
-      {@render graphOutputsColumn()}
-    </div>
-  {/if}
+    {/if}
   </div>
 </li>
 

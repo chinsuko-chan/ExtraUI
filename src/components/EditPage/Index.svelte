@@ -18,7 +18,8 @@
 </script>
 
 <article class="mx-3">
-  <ul class="py-3">
+  <!-- weird ahh overflow bug on mobile -->
+  <ul class="py-3 overflow-x-hidden md:overflow-x-auto">
     {#each nodes as node, index}
       <Node
         workflowName={selectedWorkflowName}
