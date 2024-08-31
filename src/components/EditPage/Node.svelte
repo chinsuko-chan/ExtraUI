@@ -86,21 +86,43 @@
   }
 
   let title = $state(formatTitle(node))
+  let fullyExpanded = $derived.by(() => {
+    return Boolean(viewState[workflowName]?.[id]?.expands)
+  })
   let graphInfoExpanded = $derived.by(() => {
-    return Boolean(viewState[workflowName]?.[id]?.graphInfo)
+    return Boolean(viewState[workflowName]?.[id]?.expands?.graphInfo)
   })
 
-  function toggleGraphInfo() {
+  function toggleFullExpand() {
     const newState = JSON.parse(JSON.stringify(localViewState.current))
-    if (newState[workflowName]?.[id]?.graphInfo) {
-      delete newState[workflowName][id].graphInfo
-      delete viewState[workflowName][id].graphInfo
+    if (newState[workflowName]?.[id]?.expands) {
+      delete newState[workflowName][id].expands
+      delete viewState[workflowName][id].expands
     } else {
       newState[workflowName] ||= { [id]: {} }
       viewState[workflowName] ||= { [id]: {} }
 
-      newState[workflowName][id].graphInfo = 1
-      viewState[workflowName][id].graphInfo = 1
+      newState[workflowName][id].expands = {}
+      viewState[workflowName][id].expands = {}
+    }
+
+    localViewState.save(newState)
+  }
+
+  function toggleGraphInfo() {
+    const newState = JSON.parse(JSON.stringify(localViewState.current))
+    if (newState[workflowName]?.[id]?.expands?.graphInfo) {
+      delete newState[workflowName][id].expands.graphInfo
+      delete viewState[workflowName][id].expands.graphInfo
+    } else {
+      newState[workflowName] ||= { [id]: {} }
+      viewState[workflowName] ||= { [id]: {} }
+
+      newState[workflowName][id].expands ||= {}
+      viewState[workflowName][id].expands ||= {}
+
+      newState[workflowName][id].expands.graphInfo = 1
+      viewState[workflowName][id].expands.graphInfo = 1
     }
 
     localViewState.save(newState)
@@ -206,6 +228,28 @@
   {/if}
 {/snippet}
 
+{#snippet expansionSection()}
+  {#if fullyExpanded}
+    <div class="px-3 py-2 rounded-md bg-base-200/50">
+      <section class="flex justify-between items-center gap-3">
+        <h3 class:font-bold={graphInfoExpanded}>Graph Info</h3>
+        <button class="btn btn-sm btn-neutral border-transparent" class:btn-outline={!graphInfoExpanded} onclick={toggleGraphInfo}>
+          {graphInfoExpanded ? "Hide" : "Show"}
+        </button>
+      </section>
+    </div>
+
+    {#if graphInfoExpanded}
+      <NodeGraphInfo
+        {workflowName}
+        nodeTitle={title}
+        {graphInputs}
+        {graphOutputs}
+      />
+    {/if}
+  {/if}
+{/snippet}
+
 <li
   class="flex gap-2 md:gap-3"
   class:max-w-md={allOutputsCollapsed && !graphInfoExpanded}
@@ -232,10 +276,12 @@
 
       {#if expanded}
         <button
-          class="btn btn-sm btn-ghost font-light opacity-50 hover:opacity-100"
-          onclick={toggleGraphInfo}
+          class="btn btn-sm btn-ghost hover:opacity-100"
+          class:font-light={!fullyExpanded}
+          class:opacity-50={!fullyExpanded}
+          onclick={toggleFullExpand}
         >
-          {graphInfoExpanded ? "Collapse" : "Show Graph Info"}
+          {fullyExpanded ? "Show Less" : "Show More"}
         </button>
       {/if}
     </header>
@@ -245,14 +291,7 @@
         {@render graphInputsColumn()}
 
         <div>
-          {#if graphInfoExpanded}
-            <NodeGraphInfo
-              {workflowName}
-              nodeTitle={title}
-              {graphInputs}
-              {graphOutputs}
-            />
-          {/if}
+          {@render expansionSection()}
 
           {@render inputsSection()}
 
