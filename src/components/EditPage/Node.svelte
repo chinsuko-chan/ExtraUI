@@ -86,7 +86,25 @@
   }
 
   let title = $state(formatTitle(node))
-  let graphInfoExpanded = $state(false)
+  let graphInfoExpanded = $derived.by(() => {
+    return Boolean(viewState[workflowName]?.[id]?.graphInfo)
+  })
+
+  function toggleGraphInfo() {
+    const newState = JSON.parse(JSON.stringify(localViewState.current))
+    if (newState[workflowName]?.[id]?.graphInfo) {
+      delete newState[workflowName][id].graphInfo
+      delete viewState[workflowName][id].graphInfo
+    } else {
+      newState[workflowName] ||= { [id]: {} }
+      viewState[workflowName] ||= { [id]: {} }
+
+      newState[workflowName][id].graphInfo = 1
+      viewState[workflowName][id].graphInfo = 1
+    }
+
+    localViewState.save(newState)
+  }
 
   let allOutputsCollapsed = $derived.by(() => {
     return 0 === Object.entries(viewState[workflowName]?.[id]?.outputs || {}).reduce((count, [_key, val]) => {
@@ -215,7 +233,7 @@
       {#if expanded}
         <button
           class="btn btn-sm btn-ghost font-light opacity-50 hover:opacity-100"
-          onclick={() => graphInfoExpanded = !graphInfoExpanded}
+          onclick={toggleGraphInfo}
         >
           {graphInfoExpanded ? "Collapse" : "Show Graph Info"}
         </button>
