@@ -17,7 +17,7 @@
   let nodes = $derived(workflowStore.current?.nodes || [])
 </script>
 
-<article class="mx-3">
+<article class="mx-3 md:ml-8">
   <!-- weird ahh overflow bug on mobile -->
   <ul class="py-3 overflow-x-hidden md:overflow-x-auto">
     {#each nodes as node, index}
