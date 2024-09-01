@@ -201,7 +201,7 @@ export function connectWorkflow(workflowName) {
 }
 
 export function connectNode(workflowName, nodeId) {
-  const node = getNode(workflowName, nodeId)
+  const node = $derived(getNode(workflowName, nodeId))
   if (!node) throw new Error(`invalid name or id: ${workflowName}, ${nodeId}`)
 
   return {
@@ -217,6 +217,28 @@ export function connectNode(workflowName, nodeId) {
     set title(newTitle) {
       allWorkflows[workflowName][nodeId]._meta ||= {}
       allWorkflows[workflowName][nodeId]._meta.title = newTitle
+    },
+    updateId(newId) {
+      const newState = $state.snapshot(allWorkflows[workflowName])
+      // 1. update graph outputs (this node targets them)
+      // 2. set new contents
+      // 3. delete old contents
+      getNode(workflowName, nodeId).graphOutputs.forEach(
+        ({ key, value: [targetId] }) => {
+          const originalInput = newState[targetId].inputs[key]
+          newState[targetId].inputs[key] = [newId, originalInput[1]]
+        },
+      )
+
+      newState[newId] = newState[nodeId]
+      delete newState[nodeId]
+      allWorkflows[workflowName] = newState
+      nodeId = newId
+
+      // todo: save to localStorage ^^; so much stale state rn...
+      // - PinnedInput
+      // - Node
+      // - (probably more)
     },
   }
 }

@@ -3,6 +3,7 @@
 
   import Node from "./Node.svelte"
   import RenameNodeForm from "./RenameNodeForm.svelte"
+  import UpdateNodeIdForm from "./UpdateNodeIdForm.svelte"
 
   import { connectHistory } from "stores/execution.svelte"
 
@@ -56,7 +57,7 @@
     {/each}
   </ul>
 
-  <dialog bind:this={nodeConfigModal} class="modal">
+  <dialog bind:this={nodeConfigModal} onclose={closeModal} class="modal">
     <div class="modal-box">
       {#if modalAction === "renameNode"}
         <RenameNodeForm
@@ -65,7 +66,11 @@
           {closeModal}
         />
       {:else if modalAction === "updateNodeId"}
-        <span>update id</span>
+        <UpdateNodeIdForm
+          workflowName={selectedWorkflowName}
+          nodeId={selectedNodeId}
+          {closeModal}
+        />
       {/if}
     </div>
     <form method="dialog" class="modal-backdrop">
