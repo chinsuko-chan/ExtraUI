@@ -241,10 +241,10 @@
       </section>
 
       <section class="grid grid-cols-2 gap-3">
-        <button class="btn btn-xs btn-outline mx-auto" onclick={openRenameModal}>
+        <button class="btn btn-xs btn-outline mx-auto" onclick={() => openRenameModal(id)}>
           <span>Rename Node</span>
         </button>
-        <button class="btn btn-xs btn-outline mx-auto" onclick={openUpdateNodeIdModal}>
+        <button class="btn btn-xs btn-outline mx-auto" onclick={() => openUpdateNodeIdModal(id)}>
           <span>Update ID</span>
         </button>
       </section>

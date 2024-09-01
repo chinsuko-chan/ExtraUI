@@ -2,6 +2,7 @@
   let { selectedWorkflowName } = $props()
 
   import Node from "./Node.svelte"
+  import RenameNodeForm from "./RenameNodeForm.svelte"
 
   import { connectHistory } from "stores/execution.svelte"
 
@@ -20,10 +21,18 @@
   let nodes = $derived(workflowStore.current?.nodes || [])
 
   // renameNode, updateNodeId
-  let modalAction = $state("renameNode")
-  function openModal(actionName) {
+  let modalAction = $state()
+  let selectedNodeId = $state()
+
+  function openModal(actionName, nodeId) {
     modalAction = actionName
+    selectedNodeId = nodeId
     nodeConfigModal.showModal()
+  }
+
+  function closeModal() {
+    modalAction = null
+    nodeConfigModal.close()
   }
 </script>
 
@@ -41,8 +50,8 @@
         inputs={node.inputs}
         graphOutputs={node.graphOutputs}
         outputs={mostRecentOutputs[node.id] || []}
-        openRenameModal={() => openModal("renameNode")}
-        openUpdateNodeIdModal={() => openModal("updateNodeId")}
+        openRenameModal={(nodeId) => openModal("renameNode", nodeId)}
+        openUpdateNodeIdModal={(nodeId) => openModal("updateNodeId", nodeId)}
       />
     {/each}
   </ul>
@@ -50,13 +59,17 @@
   <dialog bind:this={nodeConfigModal} class="modal">
     <div class="modal-box">
       {#if modalAction === "renameNode"}
-        <span>rename</span>
+        <RenameNodeForm
+          workflowName={selectedWorkflowName}
+          nodeId={selectedNodeId}
+          {closeModal}
+        />
       {:else if modalAction === "updateNodeId"}
         <span>update id</span>
       {/if}
     </div>
     <form method="dialog" class="modal-backdrop">
-      <button>close</button>
+      <button onclick={closeModal}>close</button>
     </form>
   </dialog>
 </article>

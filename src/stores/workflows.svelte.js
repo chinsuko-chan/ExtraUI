@@ -201,12 +201,22 @@ export function connectWorkflow(workflowName) {
 }
 
 export function connectNode(workflowName, nodeId) {
+  const node = getNode(workflowName, nodeId)
+  if (!node) throw new Error(`invalid name or id: ${workflowName}, ${nodeId}`)
+
   return {
     get current() {
-      return getNode(workflowName, nodeId)
+      return node
     },
     get hasChanges() {
       return nodeHasChanges(workflowName, nodeId)
+    },
+    get title() {
+      return node?._meta?.title || node?.class_type
+    },
+    set title(newTitle) {
+      allWorkflows[workflowName][nodeId]._meta ||= {}
+      allWorkflows[workflowName][nodeId]._meta.title = newTitle
     },
   }
 }
