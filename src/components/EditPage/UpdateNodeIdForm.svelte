@@ -22,8 +22,6 @@
   let alreadyInUseTitle = $derived.by(() => {
     return alreadyInUse?._meta?.title || alreadyInUse?.class_type
   })
-
-  $inspect(wrk.workflows)
 </script>
 
 <section>

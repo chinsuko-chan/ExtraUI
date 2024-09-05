@@ -220,6 +220,7 @@ export function connectNode(workflowName, nodeId) {
     },
     updateId(newId) {
       const newState = $state.snapshot(allWorkflows[workflowName])
+
       // 1. update graph outputs (this node targets them)
       // 2. set new contents
       // 3. delete old contents
@@ -233,12 +234,20 @@ export function connectNode(workflowName, nodeId) {
       newState[newId] = newState[nodeId]
       delete newState[nodeId]
       allWorkflows[workflowName] = newState
+
+      // 4. also update if it's pinned
+      if (allPinnedInputs[workflowName]?.[nodeId]) {
+        const newPinnedState = $state.snapshot(allPinnedInputs[workflowName])
+        newPinnedState[newId] = newPinnedState[nodeId]
+        delete newPinnedState[nodeId]
+        allPinnedInputs[workflowName] = newPinnedState
+
+        localPinnedInputs.save(allPinnedInputs)
+      }
+
       nodeId = newId
 
-      // todo: save to localStorage ^^; so much stale state rn...
-      // - PinnedInput
-      // - Node
-      // - (probably more)
+      localWorkflows.save(allWorkflows)
     },
   }
 }
