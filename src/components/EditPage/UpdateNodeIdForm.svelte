@@ -13,10 +13,10 @@
     closeModal()
   }
 
-  let unchanged = $derived(value.toString() === node.current.id)
+  let unchanged = $derived(value?.toString() === node.current.id)
   let alreadyInUse = $derived.by(() => {
     // trusdst me its for ur own good
-    return workflow?.nodes?.find(({ id }) => id === value.toString())
+    return workflow?.nodes?.find(({ id }) => id === value?.toString())
   })
 
   let alreadyInUseTitle = $derived.by(() => {
@@ -56,7 +56,7 @@
     <div class="mr-auto flex gap-2">
       <button
         class="btn btn-sm btn-success btn-outline"
-        disabled={unchanged || alreadyInUse}
+        disabled={!value || unchanged || alreadyInUse}
         onclick={handleSave}>Save</button
       >
       <button class="btn btn-sm" onclick={closeModal}> Cancel </button>

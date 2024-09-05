@@ -22,7 +22,7 @@
     <div class="mr-auto flex gap-2">
       <button
         class="btn btn-sm btn-success btn-outline"
-        disabled={node.title === value}
+        disabled={!value || node.title === value}
         onclick={handleSave}>Save</button
       >
       <button class="btn btn-sm" onclick={closeModal}> Cancel </button>
