@@ -87,7 +87,7 @@
     localViewState.save(newState)
   }
 
-  let title = $state(formatTitle(node))
+  let title = $derived(formatTitle(node))
   let fullyExpanded = $derived.by(() => {
     return Boolean(viewState[workflowName]?.[id]?.expands)
   })

@@ -36,7 +36,7 @@
   }
 
   let titleText = $derived.by(() => {
-    return `${id}. ${node._meta?.title || node.class_type}`
+    return `${id}. ${nodeStore.title}`
   })
 </script>
 
