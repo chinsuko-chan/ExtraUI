@@ -1,7 +1,7 @@
 <script>
   let { selectedWorkflowName } = $props()
 
-  import Node from "./Node.svelte"
+  import Node from "./Node"
   import RenameNodeForm from "./RenameNodeForm.svelte"
   import UpdateNodeIdForm from "./UpdateNodeIdForm.svelte"
 

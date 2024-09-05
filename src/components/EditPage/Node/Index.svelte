@@ -26,6 +26,8 @@
   import NodeOutput from "./NodeOutput.svelte"
   import NodeGraphInfo from "./NodeGraphInfo.svelte"
 
+  import menuSvg from "assets/dotdotdot.svg?raw"
+
   function formatTitle(nodeObj) {
     return nodeObj._meta?.title || nodeObj.class_type
   }
@@ -88,24 +90,27 @@
   }
 
   let title = $derived(formatTitle(node))
-  let fullyExpanded = $derived.by(() => {
-    return Boolean(viewState[workflowName]?.[id]?.expands)
+  let fullWidth = $derived.by(() => {
+    return Boolean(viewState[workflowName]?.[id]?.expands?.width)
   })
   let graphInfoExpanded = $derived.by(() => {
     return Boolean(viewState[workflowName]?.[id]?.expands?.graphInfo)
   })
 
-  function toggleFullExpand() {
+  function toggleFullWidth() {
     const newState = JSON.parse(JSON.stringify(localViewState.current))
-    if (newState[workflowName]?.[id]?.expands) {
-      delete newState[workflowName][id].expands
-      delete viewState[workflowName][id].expands
+    if (newState[workflowName]?.[id]?.expands?.width) {
+      delete newState[workflowName][id].expands.width
+      delete viewState[workflowName][id].expands.width
     } else {
       newState[workflowName] ||= { [id]: {} }
       viewState[workflowName] ||= { [id]: {} }
 
-      newState[workflowName][id].expands = {}
-      viewState[workflowName][id].expands = {}
+      newState[workflowName][id].expands ||= {}
+      viewState[workflowName][id].expands ||= {}
+
+      newState[workflowName][id].expands.width = 1
+      viewState[workflowName][id].expands.width = 1
     }
 
     localViewState.save(newState)
@@ -230,40 +235,9 @@
   {/if}
 {/snippet}
 
-{#snippet expansionSection()}
-  {#if fullyExpanded}
-    <div class="grid gap-2 px-3 py-2 rounded-md bg-base-200/50">
-      <section class="flex justify-between items-center gap-3">
-        <h3 class:text-xs={!graphInfoExpanded} class:font-bold={graphInfoExpanded}>Graph Info</h3>
-        <button class="btn btn-sm btn-neutral border-transparent" class:btn-outline={!graphInfoExpanded} onclick={toggleGraphInfo}>
-          {graphInfoExpanded ? "Hide" : "Show"}
-        </button>
-      </section>
-
-      <section class="grid grid-cols-2 gap-3">
-        <button class="btn btn-xs btn-outline mx-auto" onclick={() => openRenameModal(id)}>
-          <span>Rename Node</span>
-        </button>
-        <button class="btn btn-xs btn-outline mx-auto" onclick={() => openUpdateNodeIdModal(id)}>
-          <span>Update ID</span>
-        </button>
-      </section>
-    </div>
-
-    {#if graphInfoExpanded}
-      <NodeGraphInfo
-        {workflowName}
-        nodeTitle={title}
-        {graphInputs}
-        {graphOutputs}
-      />
-    {/if}
-  {/if}
-{/snippet}
-
 <li
   class="flex gap-2 md:gap-3"
-  class:max-w-md={allOutputsCollapsed && !graphInfoExpanded}
+  class:max-w-md={!fullWidth}
   class:mb-16={index === finalIndex}
 >
   {@render expansionButton()}
@@ -286,14 +260,27 @@
       </h2>
 
       {#if expanded}
-        <button
-          class="btn btn-sm btn-ghost hover:opacity-100"
-          class:font-light={!fullyExpanded}
-          class:opacity-50={!fullyExpanded}
-          onclick={toggleFullExpand}
-        >
-          {fullyExpanded ? "Show Less" : "Show More"}
-        </button>
+        <details class="dropdown dropdown-top">
+          <summary class="btn btn-sm btn-circle btn-ghost m-1">{@html menuSvg}</summary>
+          <ul class="menu dropdown-content right-0 w-max bg-base-100 rounded p-2 shadow">
+            <li>
+              <button onclick={() => openUpdateNodeIdModal(id)}>Update ID</button>
+            </li>
+            <li>
+              <button onclick={() => openRenameModal(id)}>Rename</button>
+            </li>
+            <li>
+              <button onclick={toggleGraphInfo}>
+                {graphInfoExpanded ? "Collapse Graph Info" : "Expand Graph Info"}
+              </button>
+            </li>
+            <li>
+              <button onclick={toggleFullWidth}>
+                Resize ({fullWidth ? "smaller" : "wider"})
+              </button>
+            </li>
+          </ul>
+        </details>
       {/if}
     </header>
 
@@ -302,7 +289,14 @@
         {@render graphInputsColumn()}
 
         <div>
-          {@render expansionSection()}
+          {#if graphInfoExpanded}
+            <NodeGraphInfo
+              {workflowName}
+              nodeTitle={title}
+              {graphInputs}
+              {graphOutputs}
+            />
+          {/if}
 
           {@render inputsSection()}
 
@@ -320,4 +314,5 @@
     /* need confirm dis works on mobile */
     scroll-margin-top: 4.5rem;
   }
+
 </style>
