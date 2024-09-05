@@ -17,7 +17,7 @@
   const inputsOpen = locationId === id
 
   import { connectNode, inputHasChanges } from "stores/workflows.svelte"
-  const nodeStore = connectNode(workflowName, id)
+  const nodeStore = $derived(connectNode(workflowName, id))
 
   function shouldDisplayBadge(value) {
     if (typeof value === "number") return true
