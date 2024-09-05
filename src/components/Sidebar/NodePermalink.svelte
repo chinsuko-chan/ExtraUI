@@ -15,7 +15,6 @@
   const nodeOpen = locationId === id
   const graphInputsOpen = locationId === id
   const inputsOpen = locationId === id
-  const outputsOpen = locationId === id
 
   import { connectNode, inputHasChanges } from "stores/workflows.svelte"
   const nodeStore = connectNode(workflowName, id)
@@ -42,7 +41,7 @@
 
 <li class="flex-grow-0 max-w-full">
   <a href={`#node-${id}`} class="absolute top-0 -left-4 flex opacity-50 hover:opacity-100">
-    <span class="text-base font-bold" class:text-primary={node.outputs.length}>#</span>
+    <span class="text-base font-bold">#</span>
   </a>
 
   <details class="max-w-full" open={nodeOpen}>
@@ -57,16 +56,10 @@
         </li>
       {/if}
 
-      <li>
-        <details class="max-w-full" open={inputsOpen}>
-          {@render subsection("Inputs", node.inputs)}
-        </details>
-      </li>
-
-      {#if node.outputs.length}
+      {#if node.inputs.length}
         <li>
-          <details class="max-w-full" open={outputsOpen}>
-            {@render subsection("Outputs", node.outputs)}
+          <details class="max-w-full" open={inputsOpen}>
+            {@render subsection("Inputs", node.inputs)}
           </details>
         </li>
       {/if}
@@ -77,7 +70,6 @@
 {#snippet subsection(title, elements)}
   <summary
     class:text-secondary={title === "Inputs" && nodeStore.hasChanges}
-    class:text-primary={title === "Outputs"}
   >
     <span>{title}</span>
     <span class="badge">{elements.length}</span>
@@ -89,7 +81,6 @@
         <div>
           <code class="text-xs break-all"
             class:text-secondary={inputHasChanges(workflowName, id, element.key)}
-            class:text-primary={title === "Outputs"}
           >{element.key}</code>
           {#if shouldDisplayBadge(element.value)}
             <span
