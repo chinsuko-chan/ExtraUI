@@ -19,7 +19,7 @@
 </script>
 
 <main class="bg-base-100 drawer lg:drawer-open">
-  <Sidebar {selectedWorkflowName} {selectWorkflow} />
+  <Sidebar {selectedPage} {selectedWorkflowName} {selectWorkflow} />
   <div class="drawer-content">
     <Navbar
       {selectedPage}
@@ -29,11 +29,11 @@
       selectViewPage={() => (selectedPage = "view")}
     />
     <div>
-      <PinnedInputs
-        workflowName={selectedWorkflowName}
-        workflowPins={workflowStore.workflowPins}
-      />
       {#if selectedPage === "edit"}
+        <PinnedInputs
+          workflowName={selectedWorkflowName}
+          workflowPins={workflowStore.workflowPins}
+        />
         <EditPage {selectedWorkflowName} />
       {:else if selectedPage === "view"}
         <span>view :)</span>

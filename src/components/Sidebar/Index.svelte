@@ -1,7 +1,7 @@
 <script>
   import workflowStore from "stores/workflows.svelte"
 
-  let { selectedWorkflowName, selectWorkflow, drawerId = "workflowDrawer" } = $props()
+  let { selectedPage, selectedWorkflowName, selectWorkflow, drawerId = "workflowDrawer" } = $props()
 
   import ghLogoSvg from "assets/gh-logo.svg?raw"
   import twtSvg from "assets/twiddr.svg?raw"
@@ -19,14 +19,18 @@
     {@render header()}
 
     <div class="flex-grow m-4">
-      <menu class="menu px-3 gap-1 border border-transparent">
-        {#each workflowStore.workflows as { name, nodes }, idx}
-          <WorkflowSection {selectedWorkflowName} {selectWorkflow} {name} {nodes} index={idx} />
-        {/each}
-        <li class="my-8">
-          <WorkflowImporter />
-        </li>
-      </menu>
+      {#if selectedPage === "edit"}
+        <menu class="menu px-3 gap-1 border border-transparent">
+          {#each workflowStore.workflows as { name, nodes }, idx}
+            <WorkflowSection {selectedWorkflowName} {selectWorkflow} {name} {nodes} index={idx} />
+          {/each}
+          <li class="my-8">
+            <WorkflowImporter />
+          </li>
+        </menu>
+      {:else}
+        <span>todo !!!</span>
+      {/if}
     </div>
 
     {@render footer()}

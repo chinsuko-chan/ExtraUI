@@ -1,7 +1,7 @@
 <script>
   let {
-    selectedWorkflowName,
     selectedPage,
+    selectedWorkflowName,
     drawerId = "workflowDrawer",
     selectEditPage,
     selectViewPage,
@@ -62,31 +62,71 @@
   }
 </script>
 
+{#snippet editActionsLeft()}
+  <label for={drawerId} class="btn btn-ghost btn-circle lg:hidden">
+    {@html menuSvg}
+  </label>
+  <button
+    class="btn btn-sm btn-outline btn-success"
+    disabled={!api.isIdle || workflowStore.hasChanges}
+    onclick={runWorkflow}
+  >
+    Run
+    {#if api.isRunning}
+      <span class="loading loading-spinner"></span>
+    {/if}
+  </button>
+  {#if workflowStore.hasChanges}
+    <button
+      class="hidden md:inline-flex btn btn-sm btn-circle btn-success w-12"
+      title="Save current changes and run the workflow."
+      onclick={saveAndRun}
+    >
+      {@html runAndGoSvg}
+    </button>
+  {/if}
+{/snippet}
+
+{#snippet editActionsRight()}
+  {#if workflowStore.current && workflowStore.hasChanges}
+    <!-- read: use text above sm -->
+    <div class="contents md:hidden">
+      <button
+        class="btn btn-sm btn-warning"
+        onclick={workflowStore.keepChanges}
+      >
+        {@html saveSvg}
+      </button>
+      <button
+        class="btn btn-circle btn-sm btn-outline btn-error"
+        onclick={workflowStore.revertChanges}
+      >
+        {@html undoSvg}
+      </button>
+    </div>
+    <div class="hidden md:contents">
+      <button
+        class="btn btn-sm btn-warning"
+        onclick={workflowStore.keepChanges}
+      >
+        Save
+      </button>
+      <button
+        class="btn btn-sm btn-outline btn-error"
+        onclick={workflowStore.revertChanges}
+      >
+        Revert
+      </button>
+    </div>
+  {/if}
+{/snippet}
+
 <nav
   class="navbar z-30 py-1.5 gap-2 bg-base-100/80 shadow-sm backdrop-blur-lg sticky top-0"
 >
-  <div class="navbar-start">
-    <label for={drawerId} class="btn btn-ghost btn-circle lg:hidden">
-      {@html menuSvg}
-    </label>
-    <button
-      class="btn btn-sm btn-outline btn-success"
-      disabled={!api.isIdle || workflowStore.hasChanges}
-      onclick={runWorkflow}
-    >
-      Run
-      {#if api.isRunning}
-        <span class="loading loading-spinner"></span>
-      {/if}
-    </button>
-    {#if workflowStore.hasChanges}
-      <button
-        class="hidden md:inline-flex btn btn-sm btn-circle btn-success w-12 ml-4"
-        title="Save current changes and run the workflow."
-        onclick={saveAndRun}
-      >
-        {@html runAndGoSvg}
-      </button>
+  <div class="navbar-start gap-3">
+    {#if selectedPage === "edit"}
+      {@render editActionsLeft()}
     {/if}
   </div>
 
@@ -120,55 +160,29 @@
   </div>
 
   <div class="navbar-end gap-3">
-    {#if workflowStore.current && workflowStore.hasChanges}
-      <!-- read: use text above sm -->
-      <div class="contents md:hidden">
-        <button
-          class="btn btn-sm btn-warning"
-          onclick={workflowStore.keepChanges}
-        >
-          {@html saveSvg}
-        </button>
-        <button
-          class="btn btn-circle btn-sm btn-outline btn-error"
-          onclick={workflowStore.revertChanges}
-        >
-          {@html undoSvg}
-        </button>
-      </div>
-      <div class="hidden md:contents">
-        <button
-          class="btn btn-sm btn-warning"
-          onclick={workflowStore.keepChanges}
-        >
-          Save
-        </button>
-        <button
-          class="btn btn-sm btn-outline btn-error"
-          onclick={workflowStore.revertChanges}
-        >
-          Revert
-        </button>
-      </div>
+    {#if selectedPage === "edit"}
+      {@render editActionsRight()}
     {/if}
   </div>
 </nav>
 
 <!-- overlay for navbar controls on mobile -->
-<div class="fixed md:hidden inset-0 z-30 pointer-events-none">
-  <div class="p-3 h-full">
-    <div class="relative h-full">
-      {#if workflowStore.hasChanges}
-        <div class="absolute bottom-0 right-0">
-          <button
-            class="btn btm-sm btn-circle btn-success pointer-events-auto"
-            title="Save current changes and run the workflow."
-            onclick={saveAndRun}
-          >
-            {@html runAndGoSvg}
-          </button>
-        </div>
-      {/if}
+{#if selectedPage === "edit"}
+  <div class="fixed md:hidden inset-0 z-30 pointer-events-none">
+    <div class="p-3 h-full">
+      <div class="relative h-full">
+        {#if workflowStore.hasChanges}
+          <div class="absolute bottom-0 right-0">
+            <button
+              class="btn btm-sm btn-circle btn-success pointer-events-auto"
+              title="Save current changes and run the workflow."
+              onclick={saveAndRun}
+            >
+              {@html runAndGoSvg}
+            </button>
+          </div>
+        {/if}
+      </div>
     </div>
   </div>
-</div>
+{/if}
