@@ -1,58 +1,35 @@
-# create-svelte
+# ExtraUI
 
-Everything you need to build a Svelte library, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+> added a readme cos i was tired of seeing the boilerplate text grr!!
 
-Read more about creating a library [in the docs](https://kit.svelte.dev/docs/packaging).
+Supplementary interface for [ComfyUI](https://github.com/comfyanonymous/ComfyUI). **(wip!)**
 
-## Creating a project
+The goal is _not_ to recreate the full functionality of comfy, but rather take **complete workflows** and make it easier to iterate with new values. Additionally, for more complex workflows it allows **re-using outputs** in sequential runs without reloading the entire workspace. No more "Mega Workflows" with hundreds of steps, just take the best parts of each workflow and combine them here!
 
-If you're seeing this, you've probably already done this step. Congrats!
+---
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+| See it in action... (also wip) |
+| :-----------------: |
+| ![example](https://github.com/user-attachments/assets/fc086311-b5f0-4bcd-94bc-296a771f2482) |
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+## Highlights
 
-## Developing
+- [x] Actually usable on mobile
+- [ ] Workflow versioning based on outputs
+- [ ] Shared inputs (eg. denoise, steps, prompts) across workflows
+- [ ] Reroute outputs from one workflow as input
+  - eg. use text2img result as the input for img2img
+- Native functionality:
+  - [ ] XY plot
+  - [ ] Seed increment
+  - [ ] Easier concat conditioning (BREAK functionality from a1111)
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Contributing
 
-```bash
-npm run dev
+I appreciate ur interest but ATM of this commit, the code is so ugly i want a better dx for u ;_; will update the README once it's ready for more contributors. Rough checklist before start accepting PRs:
+- [ ] Finish multi-workflow runner
+- [ ] Finish outputs manager
+- [ ] Final code cleanup
+- [ ] Add styleguide (i hate bikeshedding!)
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
-
-## Building
-
-To build your library:
-
-```bash
-npm run package
-```
-
-To create a production version of your showcase app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
-
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```bash
-npm publish
-```
+If you have additional feature ideas feel free to create an issue and we can discuss there!
