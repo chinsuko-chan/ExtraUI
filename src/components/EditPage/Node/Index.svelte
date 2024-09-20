@@ -135,11 +135,11 @@
     localViewState.save(newState)
   }
 
-  let allOutputsCollapsed = $derived.by(() => {
-    return 0 === Object.entries(viewState[workflowName]?.[id]?.outputs || {}).reduce((count, [_key, val]) => {
-      return count += Number(val)
-    }, 0)
-  })
+  // let allOutputsCollapsed = $derived.by(() => {
+  //   return 0 === Object.entries(viewState[workflowName]?.[id]?.outputs || {}).reduce((count, [_key, val]) => {
+  //     return count += Number(val)
+  //   }, 0)
+  // })
 </script>
 
 {#snippet expansionButton()}
@@ -260,9 +260,9 @@
       </h2>
 
       {#if expanded}
-        <details class="dropdown dropdown-top">
+        <details class="dropdown dropdown-left">
           <summary class="btn btn-sm btn-circle btn-ghost m-1">{@html menuSvg}</summary>
-          <ul class="menu dropdown-content right-0 w-max bg-base-100 rounded p-2 shadow">
+          <ul class="menu dropdown-content right-0 w-max bg-base-100 rounded p-2 shadow z-10">
             <li>
               <button onclick={() => openUpdateNodeIdModal(id)}>Update ID</button>
             </li>
