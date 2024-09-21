@@ -262,7 +262,7 @@
       {#if expanded}
         <details class="dropdown dropdown-left">
           <summary class="btn btn-sm btn-circle btn-ghost m-1">{@html menuSvg}</summary>
-          <ul class="menu dropdown-content right-0 w-max bg-base-100 rounded p-2 shadow z-10">
+          <ul class="menu dropdown-content right-0 w-max bg-base-100 rounded p-2 shadow z-20">
             <li>
               <button onclick={() => openUpdateNodeIdModal(id)}>Update ID</button>
             </li>
