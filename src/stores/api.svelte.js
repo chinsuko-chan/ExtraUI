@@ -202,6 +202,17 @@ export const api = {
       return {}
     }
   },
+  /** GET /object_info/{node_class} */
+  async objectInfo(nodeClass) {
+    const request = new Request(`http://${serverUri}/object_info/${nodeClass}`)
+    try {
+      const resp = await fetch(request)
+      return await resp.json()
+    } catch (e) {
+      console.error(e)
+      return {}
+    }
+  },
 }
 
 export default function connectApi() {
