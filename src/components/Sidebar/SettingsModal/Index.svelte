@@ -1,4 +1,6 @@
 <script>
+  import QuickPinSettings from "./QuickPinSettings.svelte"
+
   import connectApi, { STATUS } from "stores/api.svelte"
   const api = connectApi()
 
@@ -55,6 +57,12 @@
           <button
             class:active={selectedModalTab === "api"}
             onclick={() => (selectedModalTab = "api")}>API</button
+          >
+        </li>
+        <li>
+          <button
+            class:active={selectedModalTab === "quickPins"}
+            onclick={() => (selectedModalTab = "quickPins")}>Quick Pins</button
           >
         </li>
         <li>
@@ -151,6 +159,8 @@
               <span class="label-text-alt">Separate by commas</span>
             </div>
           </label>
+        {:else if selectedModalTab === "quickPins"}
+          <QuickPinSettings />
         {:else if selectedModalTab === "settings"}
           <h3 class="text-lg font-bold mb-4">ExtraUI Settings</h3>
 

@@ -6,6 +6,7 @@ const CLIENT_ID = "extraUI"
  * /prompt
  * /history/{prompt_id}
  * /view?filename={filename}&type={type}(&subfolder=%{subfolder})
+ * /object_info/{node_class}
  */
 
 export const STATUS = {

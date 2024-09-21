@@ -8,7 +8,7 @@
 
   import WorkflowSection from "./WorkflowSection.svelte"
   import WorkflowImporter from "./WorkflowImporter.svelte"
-  import SettingsModal from "./SettingsModal.svelte"
+  import SettingsModal from "./SettingsModal"
 </script>
 
 <input id={drawerId} type="checkbox" class="drawer-toggle" />

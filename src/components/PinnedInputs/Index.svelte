@@ -8,11 +8,6 @@
   })
 </script>
 
-<h3 class="p-3">
-  <span class="text-2xl font-bold">
-    {workflowName}
-  </span>
-</h3>
 {#if nodes.length}
   <aside
     class="md:ml-3 p-2 bg-base-200/80 backdrop-blur-lg shadow rounded z-30 max-w-xl sticky top-16"

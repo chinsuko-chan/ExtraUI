@@ -5,7 +5,10 @@
 
   import PinnedInputs from "components/PinnedInputs"
 
-  import workflowStore from "stores/workflows.svelte"
+  import settings from "stores/settings.svelte"
+  import workflowStore, { getWorkflow } from "stores/workflows.svelte"
+  import { connectInput } from "stores/workflows.svelte"
+
   let selectedIndex = $state(0)
   let selectedWorkflowName = $derived(
     workflowStore.workflowNames[selectedIndex],
@@ -16,6 +19,21 @@
   }
 
   let selectedPage = $state("edit")
+
+  function quickPinAll() {
+    const wfNodes = getWorkflow(selectedWorkflowName)?.nodes || []
+    settings.quickPins.forEach((pinnedClass) => {
+      wfNodes
+        .filter((node) => {
+          return node.class_type === pinnedClass
+        })
+        .forEach(({ id, inputs }) => {
+          inputs.forEach(({ key }) => {
+            connectInput(selectedWorkflowName, id, key).pin()
+          })
+        })
+    })
+  }
 </script>
 
 <main class="bg-base-100 drawer lg:drawer-open">
@@ -30,6 +48,19 @@
     />
     <div>
       {#if selectedPage === "edit"}
+        <header class="p-3 flex justify-between items-center">
+          <h3 class="text-2xl font-bold">
+            {selectedWorkflowName}
+          </h3>
+
+          <div class="flex gap-2">
+            {#if settings.quickPins.length}
+              <button class="btn btn-xs btn-outline" onclick={quickPinAll}
+                >Quick-pin</button
+              >
+            {/if}
+          </div>
+        </header>
         <PinnedInputs
           workflowName={selectedWorkflowName}
           workflowPins={workflowStore.workflowPins}
