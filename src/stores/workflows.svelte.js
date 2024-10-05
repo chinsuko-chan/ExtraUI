@@ -255,10 +255,10 @@ export function connectNode(workflowName, nodeId) {
 export function connectInput(workflowName, nodeId, inputKey) {
   return {
     get value() {
-      return (
-        getInput(workflowName, nodeId, inputKey, changes)?.value ||
-        getInput(workflowName, nodeId, inputKey)?.value
-      )
+      if (inputHasChanges(workflowName, nodeId, inputKey))
+        return getInput(workflowName, nodeId, inputKey, changes)?.value
+
+      return getInput(workflowName, nodeId, inputKey)?.value
     },
     set value(newValue) {
       allChanges[workflowName] ||= {}
