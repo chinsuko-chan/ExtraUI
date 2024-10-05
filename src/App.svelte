@@ -9,6 +9,8 @@
   import workflowStore, { getWorkflow } from "stores/workflows.svelte"
   import { connectInput } from "stores/workflows.svelte"
 
+  import workflowMock from "assets/workflow_mock.svg?raw"
+
   let selectedIndex = $state(0)
   let selectedWorkflowName = $derived(
     workflowStore.workflowNames[selectedIndex],
@@ -69,7 +71,20 @@
       {:else if selectedPage === "view"}
         <span>view :)</span>
       {:else if selectedPage === "workflow"}
-        <span>wrkflw :)</span>
+        <section class="max-h-full">
+          <p class="text-sm mb-4">
+            hihi! if ur reading this thanks for being an early user of
+            extraui!!! <!-- or checking old commits, heh -->
+            <br />
+            while working on the this page, i realized just how big the scope actually
+            was... and since the base editor page is already working, i dont wanna
+            further postpone the initial release. in the meantime please enjoy this
+            placeholder diagram showcasing the intended functionality!! ( ˘ω˘ )
+          </p>
+          <div class="max-w-xl mx-4 md:mx-auto">
+            {@html workflowMock}
+          </div>
+        </section>
       {/if}
     </div>
   </div>
