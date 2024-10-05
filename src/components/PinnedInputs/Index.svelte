@@ -10,13 +10,17 @@
 
 {#if nodes.length}
   <aside
-    class="md:ml-3 p-2 bg-base-200/80 backdrop-blur-lg shadow rounded z-30 max-w-xl sticky top-16"
+    class="md:ml-3 p-2 bg-base-200/80 backdrop-blur-lg shadow rounded z-30 max-w-xl lg:max-w-full sticky top-16"
   >
-    <div class="grid pinned-inputs-grid gap-x-2 gap-y-1">
+    <div
+      class="grid grid-flow-dense grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3"
+    >
       {#each nodes as { id, keys }}
-        {#each keys as { key }, keyIndex}
-          <PinnedInput {workflowName} {id} {key} {keyIndex} />
-        {/each}
+        <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 mb-auto">
+          {#each keys as { key }, keyIndex}
+            <PinnedInput {workflowName} {id} {key} {keyIndex} />
+          {/each}
+        </div>
       {/each}
     </div>
   </aside>
@@ -24,11 +28,7 @@
 
 <style>
   aside {
-    resize: both;
+    resize: vertical;
     overflow: scroll;
-  }
-
-  .pinned-inputs-grid {
-    grid-template-columns: max-content fit-content(40%) 1fr min-content;
   }
 </style>
