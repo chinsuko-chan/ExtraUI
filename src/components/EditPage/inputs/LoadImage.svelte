@@ -11,6 +11,8 @@
   import { connectWorkflow } from "stores/workflows.svelte"
   let workflow = $derived(connectWorkflow(workflowName))
 
+  import BlobImage from "components/shared/BlobImage.svelte"
+
   // shape of `inputs` for posterity (real)
   // [
   //   { key: "image", value: "example.png" },
@@ -50,7 +52,11 @@
 <div class="grid grid-cols-2 gap-2 pb-2">
   <input bind:this={fileUpload} type="file" onchange={uploadAndSelectFile} />
   {#if currentImage}
-    <img class="max-h-96" src={currentImage.blob} alt={currentImage.filename} />
+    <BlobImage
+      classNames="max-h-96"
+      blob={currentImage.blob}
+      alt={currentImage.filename}
+    />
   {:else}
     <code>{inputs[0].value}</code>
   {/if}

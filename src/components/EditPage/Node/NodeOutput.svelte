@@ -10,6 +10,7 @@
   let viewState = $state(localViewState.current)
   let imagesLayout = $derived(viewState[id]?.[key] || 1)
 
+  import BlobImage from "components/shared/BlobImage.svelte"
   import { connectWorkflow } from "stores/workflows.svelte"
   let workflow = $derived(connectWorkflow(workflowName))
 
@@ -95,7 +96,7 @@
       >
         {#each images as attributes}
           <div class="relative">
-            <img src={attributes.blob} alt={attributes.filename} />
+            <BlobImage blob={attributes.blob} alt={attributes.filename} />
             {#if loading}
               <span
                 class="z-10 absolute inset-x-1/2 inset-y-1/2 loading loading-spinner"

@@ -110,7 +110,7 @@ export default async function fetchImage(
       nodeId: cachedResult.nodeId,
       inputKey,
       filename: attributes.filename,
-      blob: malformedBlob ? null : URL.createObjectURL(cachedResult.blob),
+      blob: malformedBlob ? null : cachedResult.blob,
     }
   }
 
@@ -133,7 +133,7 @@ export default async function fetchImage(
     nodeId,
     inputKey,
     filename: attributes.filename,
-    blob: URL.createObjectURL(blob),
+    blob: blob,
   }
 }
 
