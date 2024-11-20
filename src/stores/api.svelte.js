@@ -17,13 +17,15 @@ export const STATUS = {
   ERROR: "ERROR",
 }
 
+export const SERVER_URI_PLACEHOLDER = "localhost:8188"
+
 import localStore from "lib/localStore"
 
 const SERVER_URI_KEY = "extraUI.stores.apiConnectionManager.serverUri"
 const IGNORELIST_KEY = "extraUI.stores.apiConnectionManager.ignorelist"
 const AUTOCONNECT_KEY = "extraUI.stores.apiConnectionManager.autoconnect"
 
-const localServerUri = localStore(SERVER_URI_KEY, null)
+const localServerUri = localStore(SERVER_URI_KEY, SERVER_URI_PLACEHOLDER)
 const localIgnorelist = localStore(IGNORELIST_KEY, [])
 const localAutoconnect = localStore(AUTOCONNECT_KEY, null)
 
