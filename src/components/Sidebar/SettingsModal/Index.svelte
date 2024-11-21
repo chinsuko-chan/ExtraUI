@@ -1,7 +1,7 @@
 <script>
   import QuickPinSettings from "./QuickPinSettings.svelte"
 
-  import connectApi, { STATUS } from "stores/api.svelte"
+  import connectApi, { STATUS, SERVER_URI_PLACEHOLDER } from "stores/api.svelte"
   const api = connectApi()
 
   let configModal = $state()
@@ -106,7 +106,7 @@
                 <input
                   type="text"
                   class="grow"
-                  placeholder="localhost:8188"
+                  placeholder={SERVER_URI_PLACEHOLDER}
                   bind:value={api.uri}
                 />
               </label>
